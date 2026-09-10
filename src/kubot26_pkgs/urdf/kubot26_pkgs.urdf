@@ -1,0 +1,1542 @@
+<!-- This URDF was automatically created by SolidWorks to URDF Exporter! Originally created by Stephen Brawner (brawner@gmail.com) 
+     Commit Version: 1.6.0-4-g7f85cfe  Build Version: 1.6.7995.38578
+     For more information, please see http://wiki.ros.org/sw_urdf_exporter -->
+<robot
+  name="kubot26_pkgs">
+
+  <!-- ================= 관성 하한(inertia floor) 적용 =================
+       SolidWorks 실측 관성(1e-5~1e-4 kg m^2)은 물리적으로는 맞지만,
+       Gazebo Classic(ODE)의 접촉 솔버에는 너무 작아서 접촉 임펄스가
+       발산하고 모델 전체가 원점으로 붕괴한다.
+       (실측: 하한 1e-4 -> 붕괴 / 3e-4 -> 정상 / 5e-4 채택)
+       아래 링크들의 ixx/iyy/izz 를 5.0e-4 로 올렸다.
+       원본값은 _backup_pre_migration/urdf/kubot26_pkgs.urdf 에 보존.
+         L_Hip_pitch        ixx: 1.310e-04 -> 5.0e-04, iyy: 1.330e-04 -> 5.0e-04, izz: 8.200e-05 -> 5.0e-04
+         L_Hip_roll         ixx: 3.000e-05 -> 5.0e-04, iyy: 4.600e-05 -> 5.0e-04, izz: 2.200e-05 -> 5.0e-04
+         L_Hip_yaw          ixx: 3.200e-04 -> 5.0e-04, iyy: 3.760e-04 -> 5.0e-04, izz: 1.670e-04 -> 5.0e-04
+         L_Knee_pitch       ixx: 1.100e-04 -> 5.0e-04, iyy: 8.400e-05 -> 5.0e-04, izz: 3.200e-05 -> 5.0e-04
+         L_Ankle_pitch      ixx: 1.710e-04 -> 5.0e-04, iyy: 4.440e-04 -> 5.0e-04, izz: 3.950e-04 -> 5.0e-04
+         L_Ankle_roll       ixx: 1.100e-05 -> 5.0e-04, iyy: 3.900e-05 -> 5.0e-04, izz: 3.500e-05 -> 5.0e-04
+         L_Foot             ixx: 3.600e-05 -> 5.0e-04, iyy: 1.430e-04 -> 5.0e-04, izz: 1.790e-04 -> 5.0e-04
+         R_Hip_pitch        ixx: 1.310e-04 -> 5.0e-04, iyy: 1.330e-04 -> 5.0e-04, izz: 8.200e-05 -> 5.0e-04
+         R_Hip_roll         ixx: 3.000e-05 -> 5.0e-04, iyy: 4.600e-05 -> 5.0e-04, izz: 2.200e-05 -> 5.0e-04
+         R_Hip_yaw          ixx: 3.210e-04 -> 5.0e-04, iyy: 3.760e-04 -> 5.0e-04, izz: 1.670e-04 -> 5.0e-04
+         R_Knee_pitch       ixx: 1.100e-04 -> 5.0e-04, iyy: 8.400e-05 -> 5.0e-04, izz: 3.200e-05 -> 5.0e-04
+         R_Ankle_pitch      ixx: 1.710e-04 -> 5.0e-04, iyy: 4.440e-04 -> 5.0e-04, izz: 3.950e-04 -> 5.0e-04
+         R_Ankle_roll       ixx: 1.100e-05 -> 5.0e-04, iyy: 3.900e-05 -> 5.0e-04, izz: 3.500e-05 -> 5.0e-04
+         R_Foot             ixx: 3.600e-05 -> 5.0e-04, iyy: 1.430e-04 -> 5.0e-04, izz: 1.790e-04 -> 5.0e-04
+         L_Shoulder_roll    ixx: 7.900e-05 -> 5.0e-04, iyy: 8.400e-05 -> 5.0e-04, izz: 4.200e-05 -> 5.0e-04
+         L_Elbow_pitch      ixx: 6.900e-05 -> 5.0e-04, iyy: 5.100e-05 -> 5.0e-04, izz: 3.600e-05 -> 5.0e-04
+         L_Hand_pitch       ixx: 2.100e-05 -> 5.0e-04, iyy: 1.700e-05 -> 5.0e-04, izz: 1.300e-05 -> 5.0e-04
+         R_Shoulder_roll    ixx: 7.900e-05 -> 5.0e-04, iyy: 8.400e-05 -> 5.0e-04, izz: 4.200e-05 -> 5.0e-04
+         R_Elbow_pitch      ixx: 6.900e-05 -> 5.0e-04, iyy: 5.100e-05 -> 5.0e-04, izz: 3.600e-05 -> 5.0e-04
+         R_Hand_pitch       ixx: 2.100e-05 -> 5.0e-04, iyy: 1.700e-05 -> 5.0e-04, izz: 1.300e-05 -> 5.0e-04
+         Neck_yaw           ixx: 1.800e-05 -> 5.0e-04, iyy: 5.000e-06 -> 5.0e-04, izz: 1.700e-05 -> 5.0e-04
+         Head_pitch         iyy: 2.010e-04 -> 5.0e-04, izz: 3.750e-04 -> 5.0e-04
+  ================================================================= -->
+
+  <!-- ===== [옵션] 고정 베이스 테스트용 world 핀 =====
+       kubot25_ws 의 urdf 에는 아래 블록이 활성화되어 있어 base_link 가 공중에 고정됩니다.
+       보행/낙하 시뮬레이션을 하려면 비활성(주석) 상태로 두고,
+       IK/관절 단독 검증만 할 때 주석을 풀어 사용하십시오.
+  <link name="world"/>
+  <joint name="fixed_to_world" type="fixed">
+    <parent link="world"/>
+    <child link="base_link"/>
+    <origin xyz="0 0 1.0" rpy="0 0 0"/>
+  </joint>
+  <gazebo reference="fixed_to_world">
+    <disableFixedJointLumping>true</disableFixedJointLumping>
+  </gazebo>
+  ============================================== -->
+
+  <link
+    name="base_link">
+    <inertial>
+      <origin
+        xyz="-0.0010724 1.5417E-05 0.0049666"
+        rpy="0 0 0" />
+      <mass
+        value="2.308868" />
+      <inertia
+        ixx="0.011887"
+        ixy="0.000000"
+        ixz="0.000223"
+        iyy="0.006649"
+        iyz="-0.000002"
+        izz="0.009457" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://kubot26_pkgs/meshes/base_link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.75294 0.75294 0.75294 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0.000480 0.000019 0.000040"
+        rpy="0 0 0" />
+      <geometry>
+        <box size="0.141000 0.265500 0.174950" />
+      </geometry>
+    </collision>
+  </link>
+  <link
+    name="L_Hip_pitch">
+    <inertial>
+      <origin
+        xyz="4.5899E-05 0.00015259 -0.052562"
+        rpy="0 0 0" />
+      <mass
+        value="0.208" />
+      <inertia
+        ixx="0.000500000"
+        ixy="0"
+        ixz=" -0.000001"
+        iyy="0.000500000"
+        iyz="0.000000"
+        izz="0.000500000" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://kubot26_pkgs/meshes/L_Hip_pitch.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.79216 0.81961 0.93333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0.002500 0.000100 -0.037550"
+        rpy="0 0 0" />
+      <geometry>
+        <box size="0.056600 0.061800 0.105100" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="L_Hip_pitch_joint"
+    type="revolute">
+    <origin
+      xyz="0.0084798 0.058519 -0.067335"
+      rpy="0 0 0" />
+    <parent
+      link="base_link" />
+    <child
+      link="L_Hip_pitch" />
+    <axis
+      xyz="0 1 0" />
+    <limit
+      lower="-1.50"
+      upper="0.150"
+      effort="8.4"
+      velocity="4.71" />
+    <dynamics
+      damping="0.5"
+      friction="0.1" />
+    <!-- motor: Dynamixel MX-106 -->
+  </joint>
+  <link
+    name="L_Hip_roll">
+    <inertial>
+      <origin
+        xyz="0.0095362 2.8384E-08 -0.036432"
+        rpy="0 0 0" />
+      <mass
+        value="0.03741" />
+      <inertia
+        ixx="0.000500000"
+        ixy="0.000000"
+        ixz="-0.000007"
+        iyy="0.000500000"
+        iyz="0.000000"
+        izz="0.000500000" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://kubot26_pkgs/meshes/L_Hip_roll.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.79216 0.81961 0.93333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0.000100 0.000000 -0.033251"
+        rpy="0 0 0" />
+      <geometry>
+        <box size="0.062000 0.030000 0.096497" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="L_Hip_roll_joint"
+    type="revolute">
+    <origin
+      xyz="0 0.0002 -0.0756"
+      rpy="0 0 0" />
+    <parent
+      link="L_Hip_pitch" />
+    <child
+      link="L_Hip_roll" />
+    <axis
+      xyz="1 0 0" />
+    <limit
+      lower="-1.55"
+      upper="1.55"
+      effort="8.4"
+      velocity="4.71" />
+    <dynamics
+      damping="0.5"
+      friction="0.1" />
+    <!-- motor: Dynamixel MX-106 -->
+  </joint>
+  <link
+    name="L_Hip_yaw">
+    <inertial>
+      <origin
+        xyz="-0.019742 5.0279E-05 -0.026799"
+        rpy="0 0 0" />
+      <mass
+        value="0.35315" />
+      <inertia
+        ixx="0.000500000"
+        ixy="0.000001"
+        ixz="-0.000008"
+        iyy="0.000500000"
+        iyz="0.000000"
+        izz="0.000500000" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://kubot26_pkgs/meshes/L_Hip_yaw.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.79216 0.81961 0.93333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="-0.020050 0.002500 -0.021800"
+        rpy="0 0 0" />
+      <geometry>
+        <box size="0.070100 0.056600 0.099600" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="L_Hip_yaw_joint"
+    type="revolute">
+    <origin
+      xyz="0.0001 0 -0.0531"
+      rpy="0 0 0" />
+    <parent
+      link="L_Hip_roll" />
+    <child
+      link="L_Hip_yaw" />
+    <axis
+      xyz="0 0 1" />
+    <limit
+      lower="-1.6"
+      upper="1.6"
+      effort="6.0"
+      velocity="6.6" />
+    <dynamics
+      damping="0.5"
+      friction="0.1" />
+    <!-- motor: Dynamixel MX-64 -->
+  </joint>
+  <link
+    name="L_Knee_pitch">
+    <inertial>
+      <origin
+        xyz="1.6376E-15 0.0001 -0.069133"
+        rpy="0 0 0" />
+      <mass
+        value="0.04000" />
+      <inertia
+        ixx="0.000500000"
+        ixy="0.000000"
+        ixz="0.000000"
+        iyy="0.000500000"
+        iyz="0.000000"
+        izz="0.000500000" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://kubot26_pkgs/meshes/L_Knee_pitch.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.79216 0.81961 0.93333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0.000000 0.000100 -0.071000"
+        rpy="0 0 0" />
+      <geometry>
+        <box size="0.028000 0.055800 0.164334" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="L_Knee_pitch_joint"
+    type="revolute">
+    <origin
+      xyz="0.0005 0 -0.0515"
+      rpy="0 0 0" />
+    <parent
+      link="L_Hip_yaw" />
+    <child
+      link="L_Knee_pitch" />
+    <axis
+      xyz="0 1 0" />
+    <limit
+      lower="-2.25"
+      upper="1.95"
+      effort="8.4"
+      velocity="4.71" />
+    <dynamics
+      damping="0.5"
+      friction="0.1" />
+    <!-- motor: Dynamixel MX-106 -->
+  </joint>
+  <link
+    name="L_Ankle_pitch">
+    <inertial>
+      <origin
+        xyz="-0.026062 5.2579E-05 0.015668"
+        rpy="0 0 0" />
+      <mass
+        value="0.383379" />
+      <inertia
+        ixx="0.000500000"
+        ixy="0.000001"
+        ixz="-0.000006"
+        iyy="0.000500000"
+        iyz="-0.000001"
+        izz="0.000500000" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://kubot26_pkgs/meshes/L_Ankle_pitch.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.79216 0.81961 0.93333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="-0.026700 0.002500 0.018050"
+        rpy="0 0 0" />
+      <geometry>
+        <box size="0.110600 0.056600 0.065100" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="L_Ankle_pitch_joint"
+    type="revolute">
+    <origin
+      xyz="0 0.0001 -0.142"
+      rpy="0 0 0" />
+    <parent
+      link="L_Knee_pitch" />
+    <child
+      link="L_Ankle_pitch" />
+    <axis
+      xyz="0 1 0" />
+    <limit
+      lower="-1.55"
+      upper="1.55"
+      effort="8.4"
+      velocity="4.71" />
+    <dynamics
+      damping="0.5"
+      friction="0.1" />
+    <!-- motor: Dynamixel MX-106 -->
+  </joint>
+  <link
+    name="L_Ankle_roll">
+    <inertial>
+      <origin
+        xyz="0.0584 -1.1774E-15 -0.015505"
+        rpy="0 0 0" />
+      <mass
+        value="0.033000" />
+      <inertia
+        ixx="0.000500000"
+        ixy="0.000000"
+        ixz="0.000000"
+        iyy="0.000500000"
+        iyz="0.000000"
+        izz="0.000500000" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://kubot26_pkgs/meshes/L_Ankle_roll.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.2 0.4 0.69804 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0.058400 0.000000 -0.011000"
+        rpy="0 0 0" />
+      <geometry>
+        <box size="0.084800 0.036000 0.050000" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="L_Ankle_roll_joint"
+    type="revolute">
+    <origin
+      xyz="-0.0562 0 0"
+      rpy="0 0 0" />
+    <parent
+      link="L_Ankle_pitch" />
+    <child
+      link="L_Ankle_roll" />
+    <axis
+      xyz="-1 0 0" />
+    <limit
+      lower="-1.55"
+      upper="1.55"
+      effort="8.4"
+      velocity="4.71" />
+    <dynamics
+      damping="0.5"
+      friction="0.1" />
+    <!-- motor: Dynamixel MX-106 -->
+  </joint>
+  <link
+    name="L_Foot">
+    <inertial>
+      <origin
+        xyz="0.0045906 0.0001 0.0031858"
+        rpy="0 0 0" />
+      <mass
+        value="0.07811" />
+      <inertia
+        ixx="0.000500000"
+        ixy="0.000000"
+        ixz="0.000001"
+        iyy="0.000500000"
+        iyz="0.000000"
+        izz="0.000500000" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://kubot26_pkgs/meshes/L_Foot.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.79216 0.81961 0.93333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0.002700 0.000100 0.005000"
+        rpy="0 0 0" />
+      <geometry>
+        <box size="0.140000 0.080000 0.010000" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="L_Foot_joint"
+    type="fixed">
+    <origin
+      xyz="0.0557 -0.0001 -0.042"
+      rpy="0 0 0" />
+    <parent
+      link="L_Ankle_roll" />
+    <child
+      link="L_Foot" />
+    <axis
+      xyz="0 0 0" />
+  </joint>
+  <link
+    name="R_Hip_pitch">
+    <inertial>
+      <origin
+        xyz="4.5899E-05 -4.7411E-05 -0.052562"
+        rpy="0 0 0" />
+      <mass
+        value="0.208000" />
+      <inertia
+        ixx="0.000500000"
+        ixy="0.000000"
+        ixz="-0.000001"
+        iyy="0.000500000"
+        iyz="0.000000"
+        izz="0.000500000" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://kubot26_pkgs/meshes/R_Hip_pitch.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.79216 0.81961 0.93333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0.002500 -0.000100 -0.037550"
+        rpy="0 0 0" />
+      <geometry>
+        <box size="0.056600 0.061800 0.105100" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="R_Hip_pitch_joint"
+    type="revolute">
+    <origin
+      xyz="0.0084798 -0.058481 -0.067335"
+      rpy="0 0 0" />
+    <parent
+      link="base_link" />
+    <child
+      link="R_Hip_pitch" />
+    <axis
+      xyz="0 -1 0" />
+    <limit
+      lower="-0.15"
+      upper="1.50"
+      effort="8.4"
+      velocity="4.71" />
+    <dynamics
+      damping="0.5"
+      friction="0.1" />
+    <!-- motor: Dynamixel MX-106 -->
+  </joint>
+  <link
+    name="R_Hip_roll">
+    <inertial>
+      <origin
+        xyz="0.0095362 2.8384E-08 -0.036432"
+        rpy="0 0 0" />
+      <mass
+        value="0.037410" />
+      <inertia
+        ixx="0.000500000"
+        ixy="0.000000"
+        ixz="-0.000007"
+        iyy="0.000500000"
+        iyz="0.000000"
+        izz="0.000500000" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://kubot26_pkgs/meshes/R_Hip_roll.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.79216 0.81961 0.93333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0.000100 0.000000 -0.033251"
+        rpy="0 0 0" />
+      <geometry>
+        <box size="0.062000 0.030000 0.096497" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="R_Hip_roll_joint"
+    type="revolute">
+    <origin
+      xyz="0 0 -0.0756"
+      rpy="0 0 0" />
+    <parent
+      link="R_Hip_pitch" />
+    <child
+      link="R_Hip_roll" />
+    <axis
+      xyz="1 0 0" />
+    <limit
+      lower="-1.55"
+      upper="1.55"
+      effort="8.4"
+      velocity="4.71" />
+    <dynamics
+      damping="0.5"
+      friction="0.1" />
+    <!-- motor: Dynamixel MX-106 -->
+  </joint>
+  <link
+    name="R_Hip_yaw">
+    <inertial>
+      <origin
+        xyz="-0.019742 -5.0317E-05 -0.026802"
+        rpy="0 0 0" />
+      <mass
+        value="0.353150" />
+      <inertia
+        ixx="0.000500000"
+        ixy="-0.000001"
+        ixz="-0.000008"
+        iyy="0.000500000"
+        iyz="0.000000"
+        izz="0.000500000" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://kubot26_pkgs/meshes/R_Hip_yaw.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.79216 0.81961 0.93333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="-0.020050 -0.002500 -0.021800"
+        rpy="0 0 0" />
+      <geometry>
+        <box size="0.070100 0.056600 0.099600" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="R_Hip_yaw_joint"
+    type="revolute">
+    <origin
+      xyz="0.0001 0 -0.0531"
+      rpy="0 0 0" />
+    <parent
+      link="R_Hip_roll" />
+    <child
+      link="R_Hip_yaw" />
+    <axis
+      xyz="0 0 1" />
+    <limit
+      lower="-1.6"
+      upper="1.6"
+      effort="6.0"
+      velocity="6.6" />
+    <dynamics
+      damping="0.5"
+      friction="0.1" />
+    <!-- motor: Dynamixel MX-64 -->
+  </joint>
+  <link
+    name="R_Knee_pitch">
+    <inertial>
+      <origin
+        xyz="1.3878E-17 -0.0001 -0.069133"
+        rpy="0 0 0" />
+      <mass
+        value="0.040000" />
+      <inertia
+        ixx="0.000500000"
+        ixy="0.000000"
+        ixz="0.000000"
+        iyy="0.000500000"
+        iyz="0.000000"
+        izz="0.000500000" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://kubot26_pkgs/meshes/R_Knee_pitch.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.79216 0.81961 0.93333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0.000000 -0.000100 -0.071000"
+        rpy="0 0 0" />
+      <geometry>
+        <box size="0.028000 0.055800 0.164334" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="R_Knee_pitch_joint"
+    type="revolute">
+    <origin
+      xyz="0.0005 0 -0.0515"
+      rpy="0 0 0" />
+    <parent
+      link="R_Hip_yaw" />
+    <child
+      link="R_Knee_pitch" />
+    <axis
+      xyz="0 -1 0" />
+    <limit
+      lower="-2.25"
+      upper="1.95"
+      effort="8.4"
+      velocity="4.71" />
+    <dynamics
+      damping="0.5"
+      friction="0.1" />
+    <!-- motor: Dynamixel MX-106 -->
+  </joint>
+  <link
+    name="R_Ankle_pitch">
+    <inertial>
+      <origin
+        xyz="-0.026066 -5.5883E-05 0.015668"
+        rpy="0 0 0" />
+      <mass
+        value="0.383379" />
+      <inertia
+        ixx="0.000500000"
+        ixy="-0.000001"
+        ixz="-0.000006"
+        iyy="0.000500000"
+        iyz="0.000001"
+        izz="0.000500000" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://kubot26_pkgs/meshes/R_Ankle_pitch.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.79216 0.81961 0.93333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="-0.026700 -0.002500 0.018050"
+        rpy="0 0 0" />
+      <geometry>
+        <box size="0.110600 0.056600 0.065100" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="R_Ankle_pitch_joint"
+    type="revolute">
+    <origin
+      xyz="0 -0.0001 -0.142"
+      rpy="0 0 0" />
+    <parent
+      link="R_Knee_pitch" />
+    <child
+      link="R_Ankle_pitch" />
+    <axis
+      xyz="0 -1 0" />
+    <limit
+      lower="-1.55"
+      upper="1.55"
+      effort="8.4"
+      velocity="4.71" />
+    <dynamics
+      damping="0.5"
+      friction="0.1" />
+    <!-- motor: Dynamixel MX-106 -->
+  </joint>
+  <link
+    name="R_Ankle_roll">
+    <inertial>
+      <origin
+        xyz="0.0584 1.3878E-17 -0.015505"
+        rpy="0 0 0" />
+      <mass
+        value="0.033000" />
+      <inertia
+        ixx="0.000500000"
+        ixy="0.000000"
+        ixz="0.000000"
+        iyy="0.000500000"
+        iyz="0.000000"
+        izz="0.000500000" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://kubot26_pkgs/meshes/R_Ankle_roll.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.2 0.4 0.69804 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0.058400 0.000000 -0.011000"
+        rpy="0 0 0" />
+      <geometry>
+        <box size="0.084800 0.036000 0.050000" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="R_Ankle_roll_joint"
+    type="revolute">
+    <origin
+      xyz="-0.0562 0 0"
+      rpy="0 0 0" />
+    <parent
+      link="R_Ankle_pitch" />
+    <child
+      link="R_Ankle_roll" />
+    <axis
+      xyz="-1 0 0" />
+    <limit
+      lower="-1.55"
+      upper="1.55"
+      effort="8.4"
+      velocity="4.71" />
+    <dynamics
+      damping="0.5"
+      friction="0.1" />
+    <!-- motor: Dynamixel MX-106 -->
+  </joint>
+  <link
+    name="R_Foot">
+    <inertial>
+      <origin
+        xyz="0.0045906 -0.0001 0.0031858"
+        rpy="0 0 0" />
+      <mass
+        value="0.07811" />
+      <inertia
+        ixx="0.000500000"
+        ixy="0.000000"
+        ixz="0.000001"
+        iyy="0.000500000"
+        iyz="0.000000"
+        izz="0.000500000" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://kubot26_pkgs/meshes/R_Foot.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.79216 0.81961 0.93333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0.002700 -0.000100 0.005000"
+        rpy="0 0 0" />
+      <geometry>
+        <box size="0.140000 0.080000 0.010000" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="R_Foot_joint"
+    type="fixed">
+    <origin
+      xyz="0.0557 0.0001 -0.042"
+      rpy="0 0 0" />
+    <parent
+      link="R_Ankle_roll" />
+    <child
+      link="R_Foot" />
+    <axis
+      xyz="0 0 0" />
+  </joint>
+  <link
+    name="L_Shoulder_roll">
+    <inertial>
+      <origin
+        xyz="-1.0078E-05 0.0072889 -0.05039"
+        rpy="0 0 0" />
+      <mass
+        value="0.160600" />
+      <inertia
+        ixx="0.000500000"
+        ixy="0.000000"
+        ixz="0.000000"
+        iyy="0.000500000"
+        iyz=" -0.000003"
+        izz="0.000500000" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://kubot26_pkgs/meshes/L_Shoulder_roll.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.79216 0.81961 0.93333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0.000100 0.010350 -0.037844"
+        rpy="0 0 0" />
+      <geometry>
+        <box size="0.056800 0.051300 0.103687" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="L_Shoulder_roll_joint"
+    type="revolute">
+    <origin
+      xyz="0.0029798 0.11877 0.052965"
+      rpy="0 0 0" />
+    <parent
+      link="base_link" />
+    <child
+      link="L_Shoulder_roll" />
+    <axis
+      xyz="1 0 0" />
+    <limit
+      lower="0.0"
+      upper="3.20"
+      effort="6.0"
+      velocity="6.6" />
+    <dynamics
+      damping="0.5"
+      friction="0.1" />
+    <!-- motor: Dynamixel MX-64 -->
+  </joint>
+  <link
+    name="L_Elbow_pitch">
+    <inertial>
+      <origin
+        xyz="-0.003143 0.0001 -0.041627"
+        rpy="0 0 0" />
+      <mass
+        value="0.04200" />
+      <inertia
+        ixx="0.000500000"
+        ixy="0.000000"
+        ixz="-0.000004"
+        iyy="0.000500000"
+        iyz="0.000000"
+        izz="0.000500000" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://kubot26_pkgs/meshes/L_Elbow_pitch.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.79216 0.81961 0.93333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="-0.001307 0.000100 -0.046076"
+        rpy="0 0 0" />
+      <geometry>
+        <box size="0.048500 0.054800 0.115000" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="L_Elbow_pitch_joint"
+    type="revolute">
+    <origin
+      xyz="0 0.008 -0.075687"
+      rpy="0 0 0" />
+    <parent
+      link="L_Shoulder_roll" />
+    <child
+      link="L_Elbow_pitch" />
+    <axis
+      xyz="0 1 0" />
+    <limit
+      lower="-2.61"
+      upper="2.61"
+      effort="6.0"
+      velocity="6.6" />
+    <dynamics
+      damping="0.5"
+      friction="0.1" />
+    <!-- motor: Dynamixel MX-64 -->
+  </joint>
+  <link
+    name="L_Hand_pitch">
+    <inertial>
+      <origin
+        xyz="-1.9589E-06 7.6453E-05 -0.01116"
+        rpy="0 0 0" />
+      <mass
+        value="0.081000" />
+      <inertia
+        ixx="0.000500000"
+        ixy="0.000000"
+        ixz="0.000000"
+        iyy="0.000500000"
+        iyz="0.000000"
+        izz="0.000500000" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://kubot26_pkgs/meshes/L_Hand_pitch.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.79216 0.81961 0.93333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0.000000 0.001900 -0.013300"
+        rpy="0 0 0" />
+      <geometry>
+        <box size="0.035600 0.043400 0.050600" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="L_Hand_pitch_joint"
+    type="revolute">
+    <origin
+      xyz="-0.0013072 -0.000375 -0.10058"
+      rpy="0 0 0" />
+    <parent
+      link="L_Elbow_pitch" />
+    <child
+      link="L_Hand_pitch" />
+    <axis
+      xyz="0 1 0" />
+    <limit
+      lower="-2.61"
+      upper="2.61"
+      effort="2.5"
+      velocity="5.76" />
+    <dynamics
+      damping="0.5"
+      friction="0.1" />
+    <!-- motor: Dynamixel MX-28 -->
+  </joint>
+  <link
+    name="R_Shoulder_roll">
+    <inertial>
+      <origin
+        xyz="0.00013985 -0.0072889 -0.05039"
+        rpy="0 0 0" />
+      <mass
+        value="0.160600" />
+      <inertia
+        ixx="0.000500000"
+        ixy="0.000000"
+        ixz="0.000000"
+        iyy="0.000500000"
+        iyz="0.000003"
+        izz="0.000500000" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://kubot26_pkgs/meshes/R_Shoulder_roll.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.79216 0.81961 0.93333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0.000100 -0.010350 -0.037844"
+        rpy="0 0 0" />
+      <geometry>
+        <box size="0.056800 0.051300 0.103687" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="R_Shoulder_roll_joint"
+    type="revolute">
+    <origin
+      xyz="0.0029798 -0.11873 0.052965"
+      rpy="0 0 0" />
+    <parent
+      link="base_link" />
+    <child
+      link="R_Shoulder_roll" />
+    <axis
+      xyz="1 0 0" />
+    <limit
+      lower="-3.20"
+      upper="0.0"
+      effort="6.0"
+      velocity="6.6" />
+    <dynamics
+      damping="0.5"
+      friction="0.1" />
+    <!-- motor: Dynamixel MX-64 -->
+  </joint>
+  <link
+    name="R_Elbow_pitch">
+    <inertial>
+      <origin
+        xyz="-0.003143 -0.0001 -0.041627"
+        rpy="0 0 0" />
+      <mass
+        value="0.04200" />
+      <inertia
+        ixx="0.000500000"
+        ixy="0.000000"
+        ixz="-0.000004"
+        iyy="0.000500000"
+        iyz="0.000000"
+        izz="0.000500000" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://kubot26_pkgs/meshes/R_Elbow_pitch.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.79216 0.81961 0.93333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="-0.001307 -0.000100 -0.046076"
+        rpy="0 0 0" />
+      <geometry>
+        <box size="0.048500 0.054800 0.115000" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="R_Elbow_pitch_joint"
+    type="revolute">
+    <origin
+      xyz="0.0001 -0.008 -0.075687"
+      rpy="0 0 0" />
+    <parent
+      link="R_Shoulder_roll" />
+    <child
+      link="R_Elbow_pitch" />
+    <axis
+      xyz="0 -1 0" />
+    <limit
+      lower="-2.61"
+      upper="2.61"
+      effort="6.0"
+      velocity="6.6" />
+    <dynamics
+      damping="0.5"
+      friction="0.1" />
+    <!-- motor: Dynamixel MX-64 -->
+  </joint>
+  <link
+    name="R_Hand_pitch">
+    <inertial>
+      <origin
+        xyz="1.9589E-06 -7.6453E-05 -0.01116"
+        rpy="0 0 0" />
+      <mass
+        value="0.081000" />
+      <inertia
+        ixx="0.000500000"
+        ixy="0.000000"
+        ixz="0.000000"
+        iyy="0.000500000"
+        iyz="0.000000"
+        izz="0.000500000" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://kubot26_pkgs/meshes/R_Hand_pitch.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.79216 0.81961 0.93333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0.000000 -0.001900 -0.013300"
+        rpy="0 0 0" />
+      <geometry>
+        <box size="0.035600 0.043400 0.050600" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="R_Hand_pitch_joint"
+    type="revolute">
+    <origin
+      xyz="-0.0013072 -0.0001 -0.10058"
+      rpy="0 0 0" />
+    <parent
+      link="R_Elbow_pitch" />
+    <child
+      link="R_Hand_pitch" />
+    <axis
+      xyz="0 -1 0" />
+    <limit
+      lower="-2.61"
+      upper="2.61"
+      effort="2.5"
+      velocity="5.76" />
+    <dynamics
+      damping="0.5"
+      friction="0.1" />
+    <!-- motor: Dynamixel MX-28 -->
+  </joint>
+  <link
+    name="Neck_yaw">
+    <inertial>
+      <origin
+        xyz="1.3878E-17 -3.4694E-17 0.031083"
+        rpy="0 0 0" />
+      <mass
+        value="0.038440" />
+      <inertia
+        ixx="0.000500000"
+        ixy="0.000000"
+        ixz="0.000000"
+        iyy="0.000500000"
+        iyz="0.000000"
+        izz="0.000500000" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://kubot26_pkgs/meshes/Neck_yaw.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.79216 0.81961 0.93333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="-0.000000 0.000000 0.037000"
+        rpy="0 0 0" />
+      <geometry>
+        <box size="0.025000 0.052550 0.032500" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="Neck_yaw_joint"
+    type="revolute">
+    <origin
+      xyz="0.01348 1.9232E-05 0.063915"
+      rpy="0 0 0" />
+    <parent
+      link="base_link" />
+    <child
+      link="Neck_yaw" />
+    <axis
+      xyz="0 0 1" />
+    <limit
+      lower="-2.61"
+      upper="2.61"
+      effort="2.5"
+      velocity="5.76" />
+    <dynamics
+      damping="0.5"
+      friction="0.1" />
+    <!-- motor: Dynamixel MX-28 -->
+  </joint>
+  <link
+    name="Head_pitch">
+    <inertial>
+      <origin
+        xyz="0.0014333 -0.00024179 0.047365"
+        rpy="0 0 0" />
+      <mass
+        value="0.318150" />
+      <inertia
+        ixx="0.000518"
+        ixy="0.000000"
+        ixz="0.000005"
+        iyy="0.000500000"
+        iyz="0.000000"
+        izz="0.000500000" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://kubot26_pkgs/meshes/Head_pitch.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.79216 0.81961 0.93333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0.001660 0.000000 0.032300"
+        rpy="0 0 0" />
+      <geometry>
+        <box size="0.038920 0.131000 0.088600" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="Head_pitch_joint"
+    type="revolute">
+    <origin
+      xyz="0 -0.000475 0.04825"
+      rpy="0 0 0" />
+    <parent
+      link="Neck_yaw" />
+    <child
+      link="Head_pitch" />
+    <axis
+      xyz="0 1 0" />
+    <limit
+      lower="-1.65"
+      upper="2.00"
+      effort="2.5"
+      velocity="5.76" />
+    <dynamics
+      damping="0.5"
+      friction="0.1" />
+    <!-- motor: Dynamixel MX-28 -->
+  </joint>
+
+  <!-- ===== Transmission (EffortJointInterface) ===== -->
+  <transmission name="trans_L_Hip_pitch_joint">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="L_Hip_pitch_joint"><hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface></joint>
+    <actuator name="motor_L_Hip_pitch_joint"><hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface><mechanicalReduction>1</mechanicalReduction></actuator>
+  </transmission>
+  <transmission name="trans_L_Hip_roll_joint">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="L_Hip_roll_joint"><hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface></joint>
+    <actuator name="motor_L_Hip_roll_joint"><hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface><mechanicalReduction>1</mechanicalReduction></actuator>
+  </transmission>
+  <transmission name="trans_L_Hip_yaw_joint">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="L_Hip_yaw_joint"><hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface></joint>
+    <actuator name="motor_L_Hip_yaw_joint"><hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface><mechanicalReduction>1</mechanicalReduction></actuator>
+  </transmission>
+  <transmission name="trans_L_Knee_pitch_joint">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="L_Knee_pitch_joint"><hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface></joint>
+    <actuator name="motor_L_Knee_pitch_joint"><hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface><mechanicalReduction>1</mechanicalReduction></actuator>
+  </transmission>
+  <transmission name="trans_L_Ankle_pitch_joint">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="L_Ankle_pitch_joint"><hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface></joint>
+    <actuator name="motor_L_Ankle_pitch_joint"><hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface><mechanicalReduction>1</mechanicalReduction></actuator>
+  </transmission>
+  <transmission name="trans_L_Ankle_roll_joint">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="L_Ankle_roll_joint"><hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface></joint>
+    <actuator name="motor_L_Ankle_roll_joint"><hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface><mechanicalReduction>1</mechanicalReduction></actuator>
+  </transmission>
+  <transmission name="trans_R_Hip_pitch_joint">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="R_Hip_pitch_joint"><hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface></joint>
+    <actuator name="motor_R_Hip_pitch_joint"><hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface><mechanicalReduction>1</mechanicalReduction></actuator>
+  </transmission>
+  <transmission name="trans_R_Hip_roll_joint">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="R_Hip_roll_joint"><hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface></joint>
+    <actuator name="motor_R_Hip_roll_joint"><hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface><mechanicalReduction>1</mechanicalReduction></actuator>
+  </transmission>
+  <transmission name="trans_R_Hip_yaw_joint">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="R_Hip_yaw_joint"><hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface></joint>
+    <actuator name="motor_R_Hip_yaw_joint"><hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface><mechanicalReduction>1</mechanicalReduction></actuator>
+  </transmission>
+  <transmission name="trans_R_Knee_pitch_joint">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="R_Knee_pitch_joint"><hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface></joint>
+    <actuator name="motor_R_Knee_pitch_joint"><hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface><mechanicalReduction>1</mechanicalReduction></actuator>
+  </transmission>
+  <transmission name="trans_R_Ankle_pitch_joint">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="R_Ankle_pitch_joint"><hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface></joint>
+    <actuator name="motor_R_Ankle_pitch_joint"><hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface><mechanicalReduction>1</mechanicalReduction></actuator>
+  </transmission>
+  <transmission name="trans_R_Ankle_roll_joint">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="R_Ankle_roll_joint"><hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface></joint>
+    <actuator name="motor_R_Ankle_roll_joint"><hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface><mechanicalReduction>1</mechanicalReduction></actuator>
+  </transmission>
+  <transmission name="trans_L_Shoulder_roll_joint">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="L_Shoulder_roll_joint"><hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface></joint>
+    <actuator name="motor_L_Shoulder_roll_joint"><hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface><mechanicalReduction>1</mechanicalReduction></actuator>
+  </transmission>
+  <transmission name="trans_L_Elbow_pitch_joint">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="L_Elbow_pitch_joint"><hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface></joint>
+    <actuator name="motor_L_Elbow_pitch_joint"><hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface><mechanicalReduction>1</mechanicalReduction></actuator>
+  </transmission>
+  <transmission name="trans_L_Hand_pitch_joint">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="L_Hand_pitch_joint"><hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface></joint>
+    <actuator name="motor_L_Hand_pitch_joint"><hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface><mechanicalReduction>1</mechanicalReduction></actuator>
+  </transmission>
+  <transmission name="trans_R_Shoulder_roll_joint">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="R_Shoulder_roll_joint"><hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface></joint>
+    <actuator name="motor_R_Shoulder_roll_joint"><hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface><mechanicalReduction>1</mechanicalReduction></actuator>
+  </transmission>
+  <transmission name="trans_R_Elbow_pitch_joint">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="R_Elbow_pitch_joint"><hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface></joint>
+    <actuator name="motor_R_Elbow_pitch_joint"><hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface><mechanicalReduction>1</mechanicalReduction></actuator>
+  </transmission>
+  <transmission name="trans_R_Hand_pitch_joint">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="R_Hand_pitch_joint"><hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface></joint>
+    <actuator name="motor_R_Hand_pitch_joint"><hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface><mechanicalReduction>1</mechanicalReduction></actuator>
+  </transmission>
+  <transmission name="trans_Neck_yaw_joint">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="Neck_yaw_joint"><hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface></joint>
+    <actuator name="motor_Neck_yaw_joint"><hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface><mechanicalReduction>1</mechanicalReduction></actuator>
+  </transmission>
+  <transmission name="trans_Head_pitch_joint">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="Head_pitch_joint"><hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface></joint>
+    <actuator name="motor_Head_pitch_joint"><hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface><mechanicalReduction>1</mechanicalReduction></actuator>
+  </transmission>
+
+  <!-- ===== Gazebo Classic 모델 플러그인 ===== -->
+  <gazebo>
+    <plugin name="kubot26_plugin" filename="libkubot_control_node.so">
+    </plugin>
+  </gazebo>
+
+  <!-- ===== IMU 센서 (플러그인이 sensors::get_sensor("IMU") 로 참조) ===== -->
+  <gazebo reference="base_link">
+    <gravity>true</gravity>
+    <sensor name="IMU" type="imu">
+      <always_on>true</always_on>
+      <update_rate>100</update_rate>
+      <visualize>true</visualize>
+      <plugin filename="libgazebo_ros_imu_sensor.so" name="imu_plugin">
+        <ros>
+          <remapping>~/out:=imu</remapping>
+        </ros>
+        <frame_name>base_link</frame_name>
+      </plugin>
+      <pose>0 0 0 0 0 0</pose>
+    </sensor>
+  </gazebo>
+
+</robot>

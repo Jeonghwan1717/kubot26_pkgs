@@ -1,0 +1,13 @@
+# colcon 빌드 산출물
+build/
+install/
+log/
+
+# 원본 export 아카이브 (필요시 수동 보관)
+*.zip
+
+# 에디터/OS
+*~
+*.swp
+.vscode/
+.DS_Store
