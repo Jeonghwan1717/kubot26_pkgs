@@ -2701,14 +2701,19 @@ void CKubot::setWalkingReadyPos(double init_x, double init_y, double init_z)
     // walkReadyAngle[18] = (0 *D2R);     // Neck_yaw_joint
     // walkReadyAngle[19] = (0 *D2R);     // head_pitch_joint
 
-    walkReadyAngle[12] = (-15 * D2R); // L_shoulder_pitch_joint 플러스가 어깨 뒤로
-    walkReadyAngle[13] = (0 * D2R);   // L_elbow_roll_joint 플러스가 좌우로 나란히
-    walkReadyAngle[14] = (-85 * D2R); // L_hand_pitch_joint  플러스가 안으로 굽
-    walkReadyAngle[15] = (-15 * D2R); // R_shoulder_pitch_joint
-    walkReadyAngle[16] = (0 * D2R);   // R_elbow_roll_joint
-    walkReadyAngle[17] = (-85 * D2R); // R_hand_pitch_joint
-    walkReadyAngle[18] = (0 * D2R);   // Neck_yaw_joint
-    walkReadyAngle[19] = (55 * D2R);  // head_pitch_joint
+    // 상체 walking ready 자세 (kubot26 관절명 기준)
+    //  - Shoulder_roll / Hand_pitch / Neck_yaw 는 0
+    //  - Elbow_pitch 는 90도 앞으로 접는다. 26 은 우측 pitch 축이 미러링(0,-1,0)
+    //    되어 있어 같은 방향으로 접으려면 좌우 부호가 반대여야 한다.
+    //    (검증: L=-90 -> 손 x=+0.104, R=+90 -> 손 x=+0.104, 둘 다 정면)
+    walkReadyAngle[12] = (0   * D2R); // L_Shoulder_roll_joint
+    walkReadyAngle[13] = (-90 * D2R); // L_Elbow_pitch_joint  (앞으로 접음)
+    walkReadyAngle[14] = (0   * D2R); // L_Hand_pitch_joint
+    walkReadyAngle[15] = (0   * D2R); // R_Shoulder_roll_joint
+    walkReadyAngle[16] = (90  * D2R); // R_Elbow_pitch_joint  (앞으로 접음, 축 미러)
+    walkReadyAngle[17] = (0   * D2R); // R_Hand_pitch_joint
+    walkReadyAngle[18] = (0   * D2R); // Neck_yaw_joint
+    walkReadyAngle[19] = (55  * D2R); // Head_pitch_joint (기존값 유지)
 
     // std::cout << "walkReadyAngle == \n" << walkReadyAngle << std::endl;
 }
