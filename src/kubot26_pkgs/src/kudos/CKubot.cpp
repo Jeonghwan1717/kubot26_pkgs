@@ -6,6 +6,35 @@ using namespace std;
 // 기립 시 base_link 높이 [m] (URDF 누적값)
 static const double KUBOT26_STAND_BASE_Z = 0.431535;
 
+// =====================================================================
+//  하드코딩 모션표의 kubot25 -> kubot26 축 부호 변환 (적용 완료)
+//
+//  두 모델은 같은 enum 인덱스를 쓰지만 URDF 축 방향이 다르다.
+//  아래 8개는 축이 반대라, 기존 kubot25 각도값에 -1 을 곱해 두었다:
+//
+//    enum  조인트              kubot25    kubot26
+//    LHY   L_Hip_yaw             -Z   ->    +Z
+//    LHR   L_Hip_roll            -X   ->    +X
+//    RHY   R_Hip_yaw             -Z   ->    +Z
+//    RHR   R_Hip_roll            -X   ->    +X
+//    RHP   R_Hip_pitch           +Y   ->    -Y
+//    RKN   R_Knee_pitch          +Y   ->    -Y
+//    RAP   R_Ankle_pitch         +Y   ->    -Y
+//    RHA   R_Hand_pitch          +Y   ->    -Y
+//
+//  그대로 쓰는 8개: LHP, LKN, LAP, LAR, RAR, LHA, NYA, HEP
+//
+//  [미해결] 팔 4개는 부호가 아니라 관절 자체가 다르다:
+//    LSP/RSP : kubot25 Shoulder_pitch(+Y)  ->  kubot26 Shoulder_roll(+X)
+//    LER/RER : kubot25 Arm_roll(+X)        ->  kubot26 Elbow_pitch(+Y/-Y)
+//  kubot26 은 어깨에서 팔을 앞뒤로 흔들 수 없다(어깨는 roll 전용, 앞뒤 굽힘은
+//  팔꿈치). 기존 팔 스윙 각도는 부호 변환으로 해결되지 않으며 재설계가 필요하다.
+//
+//  setWalkingReadyPos 는 제외했다 — 다리는 IK 산출물이고 팔은 이미 26 기준으로
+//  다시 잡았다.
+// =====================================================================
+
+
 
 
 
@@ -586,20 +615,20 @@ void CKubot::RAISE_LEFTARM(float readytime)
 
             targetAngle[RSP] = -90.0 * D2R;//left_shoulder_pitch
             targetAngle[RER] = -90.0* D2R;//left_elbow_roll
-            targetAngle[RHA] = 90.0*D2R;
+            targetAngle[RHA] = -90 * D2R;
         if (time == 0) {
             for (int j = 0; j < 20; j++) {
                 startAngle[j] = refAngle[j];
                 targetAngle[j] = refAngle[j]; // 기본적으로 현재 자세 유지
             }
             
-            targetAngle[LHR] = -10.0*D2R;
-            targetAngle[RHR] = -10.-90.0* D2R;//left_hand
+            targetAngle[LHR] = 10 * D2R;
+            targetAngle[RHR] = -(-10.-90.0* D2R);//left_hand
 
             targetAngle[LHP] = -40.0*D2R;
             targetAngle[LKN] = 20.0*D2R;
-            targetAngle[RHP] = 20.0*D2R;
-            targetAngle[RKN] = 40.0*D2R;
+            targetAngle[RHP] = -20 * D2R;
+            targetAngle[RKN] = -40 * D2R;
         }
 
             
@@ -662,10 +691,10 @@ void CKubot::WALKTHREETIMES(float readytime)
           
             targetAngle[LHP] = -40.0*D2R;
             targetAngle[LKN] = 40.0*D2R;
-            targetAngle[RAP] = -15.0*D2R;
-            targetAngle[RHP] = 15.0*D2R;
+            targetAngle[RAP] = 15 * D2R;
+            targetAngle[RHP] = -15 * D2R;
             targetAngle[RSP] = -30.0*D2R;
-            targetAngle[RHA] = -70.0*D2R;
+            targetAngle[RHA] = 70 * D2R;
             targetAngle[LSP] = 30.0*D2R;
             targetAngle[LHA] = -70.0*D2R;
 
@@ -718,14 +747,14 @@ void CKubot::WALKTHREETIMES(float readytime)
                 targetAngle[j] = refAngle[j]; // 기본적으로 현재 자세 유지
             }
             
-            targetAngle[RHP] = -40.0*D2R;
-            targetAngle[RKN] = 40.0*D2R;
+            targetAngle[RHP] = 40 * D2R;
+            targetAngle[RKN] = -40 * D2R;
             targetAngle[LAP] = -15.0*D2R;
             targetAngle[LHP] = 15.0*D2R;
             targetAngle[LSP] = -30.0*D2R;
             targetAngle[LHA] = -70.0*D2R;
             targetAngle[RSP] = 30.0*D2R;
-            targetAngle[RHA] = -70.0*D2R;
+            targetAngle[RHA] = 70 * D2R;
         }
 
             
@@ -808,12 +837,12 @@ void CKubot::kickreadypose(float readytime){
                 targetAngle[j] = refAngle[j]; // 기본적으로 현재 자세 유지
             }
             
-            targetAngle[LHR] = -10.0*D2R;
-            targetAngle[RHR] = -10.0*D2R;
-            targetAngle[RHP] = -40.0*D2R;
-            targetAngle[RKN] = 40.0*D2R;
+            targetAngle[LHR] = 10 * D2R;
+            targetAngle[RHR] = 10 * D2R;
+            targetAngle[RHP] = 40 * D2R;
+            targetAngle[RKN] = -40 * D2R;
             targetAngle[RER] = -80.0*D2R;
-            targetAngle[RHA] = -20.0*D2R;
+            targetAngle[RHA] = 20 * D2R;
             targetAngle[LAR] = 10.0*D2R;
            
         }
@@ -883,18 +912,18 @@ void CKubot::KickMotion_L(float kicktime) // 공 화면에 있을 때 tracking
     // [motion_1 단계: 준비 동작]
     if (KM_time >= 0 && motion_1 == false)
     {
-        kickAngle[0]  =   -2.500000 * D2R;  // L_Hip_yaw_joint
-        kickAngle[1]  =    0.000000 * D2R;  // L_Hip_roll_joint
+        kickAngle[0] = 2.5 * D2R;  // L_Hip_yaw_joint
+        kickAngle[1] = -0 * D2R;  // L_Hip_roll_joint
         kickAngle[2]  =  -22.500000 * D2R;  // L_Hip_pitch_joint
         kickAngle[3]  =   52.000000 * D2R;  // L_Knee_joint
         kickAngle[4]  =  -32.500000 * D2R;  // L_Ankle_pitch_joint
         kickAngle[5]  =    0.000000 * D2R;  // L_Ankle_roll_joint
 
-        kickAngle[6]  =    2.500000 * D2R;  // R_Hip_yaw_joint
-        kickAngle[7]  =    0.000000 * D2R;  // R_Hip_roll_joint
-        kickAngle[8]  =  -22.500000 * D2R;  // R_Hip_pitch_joint
-        kickAngle[9]  =   52.000000 * D2R;  // R_Knee_joint
-        kickAngle[10] =  -32.500000 * D2R;  // R_Ankle_pitch_joint  
+        kickAngle[6] = -2.5 * D2R;  // R_Hip_yaw_joint
+        kickAngle[7] = -0 * D2R;  // R_Hip_roll_joint
+        kickAngle[8] = 22.5 * D2R;  // R_Hip_pitch_joint
+        kickAngle[9] = -52 * D2R;  // R_Knee_joint
+        kickAngle[10] = 32.5 * D2R;  // R_Ankle_pitch_joint  
         kickAngle[11] =    0.000000 * D2R;  // R_Ankle_roll_joint
 
         kickAngle[12] =    0.000000 * D2R;  // L_shoulder_pitch_joint
@@ -902,7 +931,7 @@ void CKubot::KickMotion_L(float kicktime) // 공 화면에 있을 때 tracking
         kickAngle[14] = -120.000000 * D2R;  // L_hand_pitch_joint
         kickAngle[15] =    0.000000 * D2R;  // R_shoulder_pitch_joint
         kickAngle[16] =    0.000000 * D2R;  // R_elbow_roll_joint
-        kickAngle[17] = -120.000000 * D2R;  // R_hand_pitch_joint
+        kickAngle[17] = 120 * D2R;  // R_hand_pitch_joint
         kickAngle[18] =    0.000000 * D2R;  // Neck_yaw_joint
         kickAngle[19] =   65.000000 * D2R;  // head_pitch_joint
 
@@ -1196,18 +1225,18 @@ void CKubot::standupFront(float standupTime)
     if (STUtime >= 0 && motion_1 == false)
     {
 
-        standupAngle[0] =   0 * D2R;     // L_Hip_yaw_joint
-        standupAngle[1] =   0 * D2R;     // L_Hip_roll_joint
+        standupAngle[0] = -0 * D2R;     // L_Hip_yaw_joint
+        standupAngle[1] = -0 * D2R;     // L_Hip_roll_joint
         standupAngle[2] = -49 * D2R;     // L_Hip_pitch_joint
         standupAngle[3] =  65 * D2R;     // L_Knee_joint
         standupAngle[4] = -96 * D2R;     // L_Ankle_pitch_joint
         standupAngle[5] =   0 * D2R;     // L_Ankle_roll_joint
          
-        standupAngle[6] =   0 * D2R;     // R_Hip_yaw_joint
-        standupAngle[7] =  0 * D2R;      // R_Hip_roll_joint
-        standupAngle[8] = -49  * D2R;    // R_Hip_pitch_joint
-        standupAngle[9] =  65  * D2R;    // R_Knee_joint
-        standupAngle[10]= -96  * D2R;    // R_Ankle_pitch_joint
+        standupAngle[6] = -0 * D2R;     // R_Hip_yaw_joint
+        standupAngle[7] = -0 * D2R;      // R_Hip_roll_joint
+        standupAngle[8] = 49 * D2R;    // R_Hip_pitch_joint
+        standupAngle[9] = -65 * D2R;    // R_Knee_joint
+        standupAngle[10] = 96 * D2R;    // R_Ankle_pitch_joint
         standupAngle[11] = 0 * D2R;      // R_Ankle_roll_joint
 
         standupAngle[12] =  (0 * D2R);    // L_shoulder_pitch_joint 플러스가 어깨 뒤로
@@ -1215,7 +1244,7 @@ void CKubot::standupFront(float standupTime)
         standupAngle[14] =  (-110 * D2R); // L_hand_pitch_joint  플러스가 안으로 굽
         standupAngle[15] =  (0 * D2R);    // R_shoulder_pitch_joint
         standupAngle[16] =  (-0 * D2R);   // R_elbow_roll_joint
-        standupAngle[17] =  (-110 * D2R); // R_hand_pitch_joint
+        standupAngle[17] = -((-110 * D2R)); // R_hand_pitch_joint
         standupAngle[18] =  (40 * D2R);   // Neck_yaw_joint
         standupAngle[19] =  (65 * D2R);   // head_pitch_joint
 
@@ -1248,18 +1277,18 @@ void CKubot::standupFront(float standupTime)
 
     else if (STUtime >= 0 && motion_2 == false)
     {
-        standupAngle[0] =   0 * D2R;     // L_Hip_yaw_joint
-        standupAngle[1] =   0 * D2R;     // L_Hip_roll_joint
+        standupAngle[0] = -0 * D2R;     // L_Hip_yaw_joint
+        standupAngle[1] = -0 * D2R;     // L_Hip_roll_joint
         standupAngle[2] = -113 * D2R;     // L_Hip_pitch_joint
         standupAngle[3] =  120 * D2R;     // L_Knee_joint
         standupAngle[4] = -96 * D2R;     // L_Ankle_pitch_joint
         standupAngle[5] =   0 * D2R;     // L_Ankle_roll_joint
          
-        standupAngle[6] =   0 * D2R;     // R_Hip_yaw_joint
-        standupAngle[7] =  0 * D2R;      // R_Hip_roll_joint
-        standupAngle[8] = -113  * D2R;    // R_Hip_pitch_joint
-        standupAngle[9] =  120  * D2R;    // R_Knee_joint
-        standupAngle[10]= -96  * D2R;    // R_Ankle_pitch_joint
+        standupAngle[6] = -0 * D2R;     // R_Hip_yaw_joint
+        standupAngle[7] = -0 * D2R;      // R_Hip_roll_joint
+        standupAngle[8] = 113 * D2R;    // R_Hip_pitch_joint
+        standupAngle[9] = -120 * D2R;    // R_Knee_joint
+        standupAngle[10] = 96 * D2R;    // R_Ankle_pitch_joint
         standupAngle[11] = 0 * D2R;      // R_Ankle_roll_joint
 
         standupAngle[12] =  (0 * D2R);    // L_shoulder_pitch_joint 플러스가 어깨 뒤로
@@ -1267,7 +1296,7 @@ void CKubot::standupFront(float standupTime)
         standupAngle[14] =  (-110 * D2R); // L_hand_pitch_joint  플러스가 안으로 굽
         standupAngle[15] =  (0 * D2R);    // R_shoulder_pitch_joint
         standupAngle[16] =  (-0 * D2R);   // R_elbow_roll_joint
-        standupAngle[17] =  (-110 * D2R); // R_hand_pitch_joint
+        standupAngle[17] = -((-110 * D2R)); // R_hand_pitch_joint
         standupAngle[18] =  (40 * D2R);   // Neck_yaw_joint
         standupAngle[19] =  (65 * D2R);   // head_pitch_joint
 
@@ -1302,18 +1331,18 @@ void CKubot::standupFront(float standupTime)
 
     else if (STUtime >= 0 && motion_3 == false)
     {
-        standupAngle[0] = 0 * D2R;    // L_Hip_yaw_joint
-        standupAngle[1] = 0 * D2R;    // L_Hip_roll_joint
+        standupAngle[0] = -0 * D2R;    // L_Hip_yaw_joint
+        standupAngle[1] = -0 * D2R;    // L_Hip_roll_joint
         standupAngle[2] = -113 * D2R;    // L_Hip_pitch_joint -62
         standupAngle[3] = 120 * D2R;    // L_Knee_joint    132
         standupAngle[4] = -62 * D2R;  // L_Ankle_pitch_joint 
         standupAngle[5] = 0 * D2R;    // L_Ankle_roll_joint
 
-        standupAngle[6] = 0 * D2R;    // R_Hip_yaw_joint
-        standupAngle[7] = 0 * D2R;    // R_Hip_roll_joint
-        standupAngle[8] = -113 * D2R;    // R_Hip_pitch_joint
-        standupAngle[9] = 120 * D2R;    // R_Knee_joint
-        standupAngle[10] = -62 * D2R; // R_Ankle_pitch_joint
+        standupAngle[6] = -0 * D2R;    // R_Hip_yaw_joint
+        standupAngle[7] = -0 * D2R;    // R_Hip_roll_joint
+        standupAngle[8] = 113 * D2R;    // R_Hip_pitch_joint
+        standupAngle[9] = -120 * D2R;    // R_Knee_joint
+        standupAngle[10] = 62 * D2R; // R_Ankle_pitch_joint
         standupAngle[11] = 0 * D2R;   // R_Ankle_roll_joint
 
         standupAngle[12] = -47 * D2R;  // L_shoulder_pitch_joint
@@ -1321,7 +1350,7 @@ void CKubot::standupFront(float standupTime)
         standupAngle[14] = 10 * D2R;  // L_hand_pitch_joint
         standupAngle[15] = -47 * D2R;  // R_shoulder_pitch_joint
         standupAngle[16] = -4 * D2R; // R_elbow_roll_joint
-        standupAngle[17] = 10 * D2R;  // R_hand_pitch_joint
+        standupAngle[17] = -10 * D2R;  // R_hand_pitch_joint
 
         standupAngle[18] =  0 * D2R;   // Neck_yaw_joint
         standupAngle[19] = -0 * D2R; // head_pitch_joint
@@ -1356,18 +1385,18 @@ void CKubot::standupFront(float standupTime)
 
     else if (STUtime >= 0 && motion_4 == false)
     {
-        standupAngle[0] = 0 * D2R;    // L_Hip_yaw_joint
-        standupAngle[1] = 0 * D2R;    // L_Hip_roll_joint
+        standupAngle[0] = -0 * D2R;    // L_Hip_yaw_joint
+        standupAngle[1] = -0 * D2R;    // L_Hip_roll_joint
         standupAngle[2] = -113 * D2R;    // L_Hip_pitch_joint -62
         standupAngle[3] = 120 * D2R;    // L_Knee_joint    132
         standupAngle[4] = -47 * D2R;  // L_Ankle_pitch_joint 
         standupAngle[5] = 0 * D2R;    // L_Ankle_roll_joint
 
-        standupAngle[6] = 0 * D2R;    // R_Hip_yaw_joint
-        standupAngle[7] = 0 * D2R;    // R_Hip_roll_joint
-        standupAngle[8] = -113 * D2R;    // R_Hip_pitch_joint
-        standupAngle[9] = 120 * D2R;    // R_Knee_joint
-        standupAngle[10] = -47 * D2R; // R_Ankle_pitch_joint
+        standupAngle[6] = -0 * D2R;    // R_Hip_yaw_joint
+        standupAngle[7] = -0 * D2R;    // R_Hip_roll_joint
+        standupAngle[8] = 113 * D2R;    // R_Hip_pitch_joint
+        standupAngle[9] = -120 * D2R;    // R_Knee_joint
+        standupAngle[10] = 47 * D2R; // R_Ankle_pitch_joint
         standupAngle[11] = 0 * D2R;   // R_Ankle_roll_joint
 
         standupAngle[12] = -47 * D2R;  // L_shoulder_pitch_joint
@@ -1375,7 +1404,7 @@ void CKubot::standupFront(float standupTime)
         standupAngle[14] = -0 * D2R;  // L_hand_pitch_joint
         standupAngle[15] = -47 * D2R;  // R_shoulder_pitch_joint
         standupAngle[16] = -4 * D2R; // R_elbow_roll_joint
-        standupAngle[17] = -0 * D2R;  // R_hand_pitch_joint
+        standupAngle[17] = 0 * D2R;  // R_hand_pitch_joint
 
         standupAngle[18] =  0 * D2R;   // Neck_yaw_joint
         standupAngle[19] = -0 * D2R; // head_pitch_joint
@@ -1412,17 +1441,17 @@ void CKubot::standupFront(float standupTime)
     else if (STUtime >= 0 && motion_5 == false)
     {
 
-        standupAngle[0]  =  0.000000 * D2R;  // L_Hip_yaw_joint
-        standupAngle[1]  =   0.000000 * D2R;  // L_Hip_roll_joint
+        standupAngle[0] = -0 * D2R;  // L_Hip_yaw_joint
+        standupAngle[1] = -0 * D2R;  // L_Hip_roll_joint
         standupAngle[2]  = -39 * D2R;  // L_Hip_pitch_joint  
         standupAngle[3]  =  81 * D2R;  // L_Knee_joint
         standupAngle[4]  = -42 * D2R;  // L_Ankle_pitch_joint  //39
         standupAngle[5]  =   0.000000 * D2R;  // L_Ankle_roll_joint
-        standupAngle[6]  =  0.000000 * D2R;  // R_Hip_yaw_joint
-        standupAngle[7]  =   0.000000 * D2R;  // R_Hip_roll_joint
-        standupAngle[8]  = -39 * D2R;  // R_Hip_pitch_joint
-        standupAngle[9]  =  81 * D2R;  // R_Knee_joint
-        standupAngle[10] = -42 * D2R;  // R_Ankle_pitch_joint  //39, 44
+        standupAngle[6] = -0 * D2R;  // R_Hip_yaw_joint
+        standupAngle[7] = -0 * D2R;  // R_Hip_roll_joint
+        standupAngle[8] = 39 * D2R;  // R_Hip_pitch_joint
+        standupAngle[9] = -81 * D2R;  // R_Knee_joint
+        standupAngle[10] = 42 * D2R;  // R_Ankle_pitch_joint  //39, 44
         standupAngle[11] =   0.000000 * D2R;  // R_Ankle_roll_joint
 
         standupAngle[12] = (0 * D2R); /// L_shoulder_pitch_joint 플러스가 어깨 뒤로
@@ -1430,7 +1459,7 @@ void CKubot::standupFront(float standupTime)
         standupAngle[14] = (-100 * D2R);/// L_hand_pitch_joint  플러스가 안으로 굽
         standupAngle[15] = (0 * D2R); /// R_shoulder_pitch_joint
         standupAngle[16] = (-0 * D2R);   // R_elbow_roll_joint
-        standupAngle[17] = (-100 * D2R);// R_hand_pitch_joint
+        standupAngle[17] = -((-100 * D2R));// R_hand_pitch_joint
         standupAngle[18] = (0 * D2R);  // NecstandupFk_yaw_joint
         standupAngle[19] = (0 * D2R);  /// head_pitch_joint //55
 
@@ -1488,17 +1517,17 @@ void CKubot::standupBack(float standupTime)
 
     if (STUtime >= 0 && motion_1 == false)
     {
-        standupAngle[0] = 0 * D2R;   // L_Hip_yaw_joint
-        standupAngle[1] = 0 * D2R;   // L_Hip_roll_joint
+        standupAngle[0] = -0 * D2R;   // L_Hip_yaw_joint
+        standupAngle[1] = -0 * D2R;   // L_Hip_roll_joint
         standupAngle[2] = -30 * D2R; // L_Hip_pitch_joint
         standupAngle[3] = 90 * D2R;  // L_Knee_joint
         standupAngle[4] = 30 * D2R;  // L_Ankle_pitch_joint
         standupAngle[5] = 0 * D2R;   // L_Ankle_roll_joint
-        standupAngle[6] = 0 * D2R;   // R_Hip_yaw_joint
-        standupAngle[7] = 0 * D2R;   // R_Hip_roll_joint
-        standupAngle[8] = -30 * D2R; // R_Hip_pitch_joint
-        standupAngle[9] = 90 * D2R;  // R_Knee_joint
-        standupAngle[10] = 30 * D2R; // R_Ankle_pitch_joint
+        standupAngle[6] = -0 * D2R;   // R_Hip_yaw_joint
+        standupAngle[7] = -0 * D2R;   // R_Hip_roll_joint
+        standupAngle[8] = 30 * D2R; // R_Hip_pitch_joint
+        standupAngle[9] = -90 * D2R;  // R_Knee_joint
+        standupAngle[10] = -30 * D2R; // R_Ankle_pitch_joint
         standupAngle[11] = 0 * D2R;  // R_Ankle_roll_joint
 
         standupAngle[12] = -0 * D2R;  // L_shoulder_pitch_joint
@@ -1506,7 +1535,7 @@ void CKubot::standupBack(float standupTime)
         standupAngle[14] = 0 * D2R;   // L_hand_pitch_joint
         standupAngle[15] = -0 * D2R;  // R_shoulder_pitch_joint
         standupAngle[16] = -90 * D2R; // R_elbow_roll_joint
-        standupAngle[17] = 0 * D2R;   // R_hand_pitch_joint
+        standupAngle[17] = -0 * D2R;   // R_hand_pitch_joint
         standupAngle[18] = 0 * D2R;   // Neck_yaw_joint
         standupAngle[19] = 0 * D2R;   // head_pitch_joint
 
@@ -1539,17 +1568,17 @@ void CKubot::standupBack(float standupTime)
 
     else if (STUtime >= 0 && motion_2 == false)
     {
-        standupAngle[0] = 0 * D2R;   // L_Hip_yaw_joint
-        standupAngle[1] = 0 * D2R;   // L_Hip_roll_joint
+        standupAngle[0] = -0 * D2R;   // L_Hip_yaw_joint
+        standupAngle[1] = -0 * D2R;   // L_Hip_roll_joint
         standupAngle[2] = -70 * D2R; // L_Hip_pitch_joint
         standupAngle[3] = 90 * D2R;  // L_Knee_joint
         standupAngle[4] = 35 * D2R;  // L_Ankle_pitch_joint
         standupAngle[5] = 0 * D2R;   // L_Ankle_roll_joint
-        standupAngle[6] = 0 * D2R;   // R_Hip_yaw_joint
-        standupAngle[7] = 0 * D2R;   // R_Hip_roll_joint
-        standupAngle[8] = -70 * D2R; // R_Hip_pitch_joint
-        standupAngle[9] = 90 * D2R;  // R_Knee_joint
-        standupAngle[10] = 35 * D2R; // R_Ankle_pitch_joint
+        standupAngle[6] = -0 * D2R;   // R_Hip_yaw_joint
+        standupAngle[7] = -0 * D2R;   // R_Hip_roll_joint
+        standupAngle[8] = 70 * D2R; // R_Hip_pitch_joint
+        standupAngle[9] = -90 * D2R;  // R_Knee_joint
+        standupAngle[10] = -35 * D2R; // R_Ankle_pitch_joint
         standupAngle[11] = 0 * D2R;  // R_Ankle_roll_joint
 
         standupAngle[12] = -0 * D2R;   // L_shoulder_pitch_joint
@@ -1557,7 +1586,7 @@ void CKubot::standupBack(float standupTime)
         standupAngle[14] = 0 * D2R;    // L_hand_pitch_joint
         standupAngle[15] = -0 * D2R;   // R_shoulder_pitch_joint
         standupAngle[16] = -180 * D2R; // R_elbow_roll_joint
-        standupAngle[17] = 0 * D2R;    // R_hand_pitch_joint
+        standupAngle[17] = -0 * D2R;    // R_hand_pitch_joint
         standupAngle[18] = 0 * D2R;    // Neck_yaw_joint
         standupAngle[19] = 0 * D2R;    // head_pitch_joint
 
@@ -1590,17 +1619,17 @@ void CKubot::standupBack(float standupTime)
 
     else if (STUtime >= 0 && motion_3 == false)
     {
-        standupAngle[0] = 0 * D2R;   // L_Hip_yaw_joint
-        standupAngle[1] = 0 * D2R;   // L_Hip_roll_joint
+        standupAngle[0] = -0 * D2R;   // L_Hip_yaw_joint
+        standupAngle[1] = -0 * D2R;   // L_Hip_roll_joint
         standupAngle[2] = -10 * D2R; // L_Hip_pitch_joint
         standupAngle[3] = 95 * D2R; // L_Knee_joint
         standupAngle[4] = 0 * D2R;   // L_Ankle_pitch_joint
         standupAngle[5] = 0 * D2R;   // L_Ankle_roll_joint
-        standupAngle[6] = 0 * D2R;   // R_Hip_yaw_joint
-        standupAngle[7] = 0 * D2R;   // R_Hip_roll_joint
-        standupAngle[8] = -10 * D2R; // R_Hip_pitch_joint
-        standupAngle[9] = 95 * D2R; // R_Knee_joint
-        standupAngle[10] = 0 * D2R;  // R_Ankle_pitch_joint
+        standupAngle[6] = -0 * D2R;   // R_Hip_yaw_joint
+        standupAngle[7] = -0 * D2R;   // R_Hip_roll_joint
+        standupAngle[8] = 10 * D2R; // R_Hip_pitch_joint
+        standupAngle[9] = -95 * D2R; // R_Knee_joint
+        standupAngle[10] = -0 * D2R;  // R_Ankle_pitch_joint
         standupAngle[11] = 0 * D2R;  // R_Ankle_roll_joint
 
         standupAngle[12] = -0 * D2R;   // L_shoulder_pitch_joint
@@ -1608,7 +1637,7 @@ void CKubot::standupBack(float standupTime)
         standupAngle[14] = 0 * D2R;    // L_hand_pitch_joint
         standupAngle[15] = -0 * D2R;   // R_shoulder_pitch_joint
         standupAngle[16] = -180 * D2R; // R_elbow_roll_joint
-        standupAngle[17] = 0 * D2R;    // R_hand_pitch_joint
+        standupAngle[17] = -0 * D2R;    // R_hand_pitch_joint
         standupAngle[18] = 0 * D2R;    // Neck_yaw_joint
         standupAngle[19] = 0 * D2R;    // head_pitch_joint
 
@@ -1642,17 +1671,17 @@ void CKubot::standupBack(float standupTime)
 
     else if (STUtime >= 0 && motion_4 == false)
     {
-        standupAngle[0] = 0 * D2R;    // L_Hip_yaw_joint
-        standupAngle[1] = 0 * D2R;    // L_Hip_roll_joint
+        standupAngle[0] = -0 * D2R;    // L_Hip_yaw_joint
+        standupAngle[1] = -0 * D2R;    // L_Hip_roll_joint
         standupAngle[2] = 30 * D2R;   // L_Hip_pitch_joint
         standupAngle[3] = 75 * D2R;   // L_Knee_joint
         standupAngle[4] = -30 * D2R;  // L_Ankle_pitch_joint
         standupAngle[5] = 0 * D2R;    // L_Ankle_roll_joint
-        standupAngle[6] = 0 * D2R;    // R_Hip_yaw_joint
-        standupAngle[7] = 0 * D2R;    // R_Hip_roll_joint
-        standupAngle[8] = 30 * D2R;   // R_Hip_pitch_joint
-        standupAngle[9] = 75 * D2R;   // R_Knee_joint
-        standupAngle[10] = -30 * D2R; // R_Ankle_pitch_joint
+        standupAngle[6] = -0 * D2R;    // R_Hip_yaw_joint
+        standupAngle[7] = -0 * D2R;    // R_Hip_roll_joint
+        standupAngle[8] = -30 * D2R;   // R_Hip_pitch_joint
+        standupAngle[9] = -75 * D2R;   // R_Knee_joint
+        standupAngle[10] = 30 * D2R; // R_Ankle_pitch_joint
         standupAngle[11] = 0 * D2R;   // R_Ankle_roll_joint
 
         standupAngle[12] = -37 * D2R;  // L_shoulder_pitch_joint
@@ -1660,7 +1689,7 @@ void CKubot::standupBack(float standupTime)
         standupAngle[14] = -78 * D2R;    // L_hand_pitch_joint
         standupAngle[15] = -37 * D2R;  // R_shoulder_pitch_joint
         standupAngle[16] = -165 * D2R; // R_elbow_roll_joint
-        standupAngle[17] = -78 * D2R;    // R_hand_pitch_joint
+        standupAngle[17] = 78 * D2R;    // R_hand_pitch_joint
         standupAngle[18] = 0 * D2R;    // Nfeck_yaw_joint
         standupAngle[19] = 0 * D2R;    // head_pitch_joint
 
@@ -1693,18 +1722,18 @@ void CKubot::standupBack(float standupTime)
 
     else if (STUtime >= 0 && motion_5 == false)
     {
-        standupAngle[0] = 0 * D2R;    // L_Hip_yaw_joint
-        standupAngle[1] = 0 * D2R;    // L_Hip_roll_joint
+        standupAngle[0] = -0 * D2R;    // L_Hip_yaw_joint
+        standupAngle[1] = -0 * D2R;    // L_Hip_roll_joint
         standupAngle[2] = 30 * D2R;   // L_Hip_pitch_joint
         standupAngle[3] = 75 * D2R;   // L_Knee_joint
         standupAngle[4] = -30 * D2R;  // L_Ankle_pitch_joint
         standupAngle[5] = 0 * D2R;    // L_Ankle_roll_joint
         
-        standupAngle[6] = 0 * D2R;    // R_Hip_yaw_joint
-        standupAngle[7] = 0 * D2R;    // R_Hip_roll_joint
-        standupAngle[8] = 30 * D2R;   // R_Hip_pitch_joint
-        standupAngle[9] = 75 * D2R;   // R_Knee_joint
-        standupAngle[10] = -30 * D2R; // R_Ankle_pitch_joint
+        standupAngle[6] = -0 * D2R;    // R_Hip_yaw_joint
+        standupAngle[7] = -0 * D2R;    // R_Hip_roll_joint
+        standupAngle[8] = -30 * D2R;   // R_Hip_pitch_joint
+        standupAngle[9] = -75 * D2R;   // R_Knee_joint
+        standupAngle[10] = 30 * D2R; // R_Ankle_pitch_joint
         standupAngle[11] = 0 * D2R;   // R_Ankle_roll_joint
 
         standupAngle[12] = -85 * D2R;  // L_shoulder_pitch_joint
@@ -1712,7 +1741,7 @@ void CKubot::standupBack(float standupTime)
         standupAngle[14] = -110 * D2R;    // L_hand_pitch_joint
         standupAngle[15] = -85 * D2R;  // R_shoulder_pitch_joint
         standupAngle[16] = -165 * D2R; // R_elbow_roll_joint
-        standupAngle[17] = -110 * D2R;    // R_hand_pitch_joint
+        standupAngle[17] = 110 * D2R;    // R_hand_pitch_joint
         standupAngle[18] = 0 * D2R;    // Nfeck_yaw_joint
         standupAngle[19] = 0 * D2R;    // head_pitch_joint
 
@@ -1746,18 +1775,18 @@ void CKubot::standupBack(float standupTime)
 
     else if (STUtime >= 0 && motion_6 == false)
     {
-        standupAngle[0] = 0 * D2R;    // L_Hip_yaw_joint
-        standupAngle[1] = 0 * D2R;    // L_Hip_roll_joint
+        standupAngle[0] = -0 * D2R;    // L_Hip_yaw_joint
+        standupAngle[1] = -0 * D2R;    // L_Hip_roll_joint
         standupAngle[2] = 30 * D2R;   // L_Hip_pitch_joint
         standupAngle[3] = 100 * D2R;   // L_Knee_joint
         standupAngle[4] = -15 * D2R;  // L_Ankle_pitch_joint
         standupAngle[5] = 0 * D2R;    // L_Ankle_roll_joint
         
-        standupAngle[6] = 0 * D2R;    // R_Hip_yaw_joint
-        standupAngle[7] = 0 * D2R;    // R_Hip_roll_joint
-        standupAngle[8] = 30 * D2R;   // R_Hip_pitch_joint
-        standupAngle[9] = 100 * D2R;   // R_Knee_joint
-        standupAngle[10] = -15 * D2R; // R_Ankle_pitch_joint
+        standupAngle[6] = -0 * D2R;    // R_Hip_yaw_joint
+        standupAngle[7] = -0 * D2R;    // R_Hip_roll_joint
+        standupAngle[8] = -30 * D2R;   // R_Hip_pitch_joint
+        standupAngle[9] = -100 * D2R;   // R_Knee_joint
+        standupAngle[10] = 15 * D2R; // R_Ankle_pitch_joint
         standupAngle[11] = 0 * D2R;   // R_Ankle_roll_joint
 
         standupAngle[12] = -85 * D2R;  // L_shoulder_pitch_joint
@@ -1765,7 +1794,7 @@ void CKubot::standupBack(float standupTime)
         standupAngle[14] = -85 * D2R;    // L_hand_pitch_joint
         standupAngle[15] = -85 * D2R;  // R_shoulder_pitch_joint
         standupAngle[16] = -165 * D2R; // R_elbow_roll_joint
-        standupAngle[17] = -85 * D2R;    // R_hand_pitch_joint
+        standupAngle[17] = 85 * D2R;    // R_hand_pitch_joint
         standupAngle[18] = 0 * D2R;    // Nfeck_yaw_joint
         standupAngle[19] = 0 * D2R;    // head_pitch_joint
 
@@ -1800,18 +1829,18 @@ void CKubot::standupBack(float standupTime)
     else if (STUtime >= 0 && motion_7 == false)
     {
 
-        standupAngle[0] = 0 * D2R;    // L_Hip_yaw_joint
-        standupAngle[1] = 0 * D2R;    // L_Hip_roll_joint
+        standupAngle[0] = -0 * D2R;    // L_Hip_yaw_joint
+        standupAngle[1] = -0 * D2R;    // L_Hip_roll_joint
         standupAngle[2] = 30 * D2R;   // L_Hip_pitch_joint
         standupAngle[3] = 104 * D2R;   // L_Knee_joint
         standupAngle[4] = -37 * D2R;  // L_Ankle_pitch_joint
         standupAngle[5] = 0 * D2R;    // L_Ankle_roll_joint
         
-        standupAngle[6] = 0 * D2R;    // R_Hip_yaw_joint
-        standupAngle[7] = 0 * D2R;    // R_Hip_roll_joint
-        standupAngle[8] = 30 * D2R;   // R_Hip_pitch_joint
-        standupAngle[9] = 104 * D2R;   // R_Knee_joint
-        standupAngle[10] = -37 * D2R; // R_Ankle_pitch_joint
+        standupAngle[6] = -0 * D2R;    // R_Hip_yaw_joint
+        standupAngle[7] = -0 * D2R;    // R_Hip_roll_joint
+        standupAngle[8] = -30 * D2R;   // R_Hip_pitch_joint
+        standupAngle[9] = -104 * D2R;   // R_Knee_joint
+        standupAngle[10] = 37 * D2R; // R_Ankle_pitch_joint
         standupAngle[11] = 0 * D2R;   // R_Ankle_roll_joint
 
         standupAngle[12] = (-85) * D2R;  // L_shoulder_pitch_joint
@@ -1819,7 +1848,7 @@ void CKubot::standupBack(float standupTime)
         standupAngle[14] = -3 * D2R;    // L_hand_pitch_joint
         standupAngle[15] = (-85) * D2R;  // R_shoulder_pitch_joint
         standupAngle[16] = (-165) * D2R; // R_elbow_roll_joint
-        standupAngle[17] = -3 * D2R;    // R_hand_pitch_joint
+        standupAngle[17] = 3 * D2R;    // R_hand_pitch_joint
         standupAngle[18] = 0 * D2R;    // Nfeck_yaw_joint
         standupAngle[19] = 0 * D2R;    // head_pitch_joint
         if (STUtime == 0 && motion_7 == false)
@@ -1854,18 +1883,18 @@ void CKubot::standupBack(float standupTime)
   else if (STUtime >= 0 && motion_8 == false)
     {
 
-        standupAngle[0] = 0 * D2R;    // L_Hip_yaw_joint
-        standupAngle[1] = 0 * D2R;    // L_Hip_roll_joint
+        standupAngle[0] = -0 * D2R;    // L_Hip_yaw_joint
+        standupAngle[1] = -0 * D2R;    // L_Hip_roll_joint
         standupAngle[2] = 40 * D2R;   // L_Hip_pitch_joint
         standupAngle[3] = (115-10) * D2R;   // L_Knee_joint
         standupAngle[4] = (-90+30) * D2R;  // L_Ankle_pitch_joint
         standupAngle[5] = 0 * D2R;    // L_Ankle_roll_joint
         
-        standupAngle[6] = 0 * D2R;    // R_Hip_yaw_joint
-        standupAngle[7] = 0 * D2R;    // R_Hip_roll_joint
-        standupAngle[8] = 40 * D2R;   // R_Hip_pitch_joint
-        standupAngle[9] = (115-10) * D2R;   // R_Knee_joint
-        standupAngle[10] = (-90+30) * D2R; // R_Ankle_pitch_joint
+        standupAngle[6] = -0 * D2R;    // R_Hip_yaw_joint
+        standupAngle[7] = -0 * D2R;    // R_Hip_roll_joint
+        standupAngle[8] = -40 * D2R;   // R_Hip_pitch_joint
+        standupAngle[9] = -((115-10) * D2R);   // R_Knee_joint
+        standupAngle[10] = -((-90+30) * D2R); // R_Ankle_pitch_joint
         standupAngle[11] = 0 * D2R;   // R_Ankle_roll_joint
 
         standupAngle[12] = (-100+5) * D2R;  // L_shoulder_pitch_joint
@@ -1873,7 +1902,7 @@ void CKubot::standupBack(float standupTime)
         standupAngle[14] = -3 * D2R;    // L_hand_pitch_joint
         standupAngle[15] = (-100+5) * D2R;  // R_shoulder_pitch_joint
         standupAngle[16] = -165 * D2R; // R_elbow_roll_joint
-        standupAngle[17] = -3 * D2R;    // R_hand_pitch_joint
+        standupAngle[17] = 3 * D2R;    // R_hand_pitch_joint
         standupAngle[18] = 0 * D2R;    // Nfeck_yaw_joint
         standupAngle[19] = 0 * D2R;    // head_pitch_joint
         if (STUtime == 0 && motion_8 == false)
@@ -1908,18 +1937,18 @@ void CKubot::standupBack(float standupTime)
  else if (STUtime >= 0 && motion_9 == false)
     {
 
-        standupAngle[0] = 0 * D2R;    // L_Hip_yaw_joint
-        standupAngle[1] = 0 * D2R;    // L_Hip_roll_joint
+        standupAngle[0] = -0 * D2R;    // L_Hip_yaw_joint
+        standupAngle[1] = -0 * D2R;    // L_Hip_roll_joint
         standupAngle[2] = 40 * D2R;   // L_Hip_pitch_joint
         standupAngle[3] = (115-10+5) * D2R;   // L_Knee_joint
         standupAngle[4] = (-90+30-10) * D2R;  // L_Ankle_pitch_joint
         standupAngle[5] = 0 * D2R;    // L_Ankle_roll_joint
         
-        standupAngle[6] = 0 * D2R;    // R_Hip_yaw_joint
-        standupAngle[7] = 0 * D2R;    // R_Hip_roll_joint
-        standupAngle[8] = 40 * D2R;   // R_Hip_pitch_joint
-        standupAngle[9] = (115-10+5) * D2R;   // R_Knee_joint
-        standupAngle[10] = (-90+30-10) * D2R; // R_Ankle_pitch_joint
+        standupAngle[6] = -0 * D2R;    // R_Hip_yaw_joint
+        standupAngle[7] = -0 * D2R;    // R_Hip_roll_joint
+        standupAngle[8] = -40 * D2R;   // R_Hip_pitch_joint
+        standupAngle[9] = -((115-10+5) * D2R);   // R_Knee_joint
+        standupAngle[10] = -((-90+30-10) * D2R); // R_Ankle_pitch_joint
         standupAngle[11] = 0 * D2R;   // R_Ankle_roll_joint
 
         standupAngle[12] = (-100+5) * D2R;  // L_shoulder_pitch_joint
@@ -1927,7 +1956,7 @@ void CKubot::standupBack(float standupTime)
         standupAngle[14] = -3 * D2R;    // L_hand_pitch_joint
         standupAngle[15] = (-100+5) * D2R;  // R_shoulder_pitch_joint
         standupAngle[16] = -165 * D2R; // R_elbow_roll_joint
-        standupAngle[17] = -3 * D2R;    // R_hand_pitch_joint
+        standupAngle[17] = 3 * D2R;    // R_hand_pitch_joint
         standupAngle[18] = 0 * D2R;    // Nfeck_yaw_joint
         standupAngle[19] = 0 * D2R;    // head_pitch_joint
         if (STUtime == 0 && motion_9 == false)
@@ -1963,18 +1992,18 @@ void CKubot::standupBack(float standupTime)
  else if (STUtime >= 0 && motion_10 == false)
     {
 
-        standupAngle[0] = 0 * D2R;    // L_Hip_yaw_joint
-        standupAngle[1] = 0 * D2R;    // L_Hip_roll_joint
+        standupAngle[0] = -0 * D2R;    // L_Hip_yaw_joint
+        standupAngle[1] = -0 * D2R;    // L_Hip_roll_joint
         standupAngle[2] = (40) * D2R;   // L_Hip_pitch_joint
         standupAngle[3] = 110 * D2R;   // L_Knee_joint
         standupAngle[4] = (-85) * D2R;  // L_Ankle_pitch_joint
         standupAngle[5] = 0 * D2R;    // L_Ankle_roll_joint
         
-        standupAngle[6] = 0 * D2R;    // R_Hip_yaw_joint
-        standupAngle[7] = 0 * D2R;    // R_Hip_roll_joint
-        standupAngle[8] = (40) * D2R;   // R_Hip_pitch_joint
-        standupAngle[9] = 110 * D2R;   // R_Knee_joint
-        standupAngle[10] = (-85) * D2R; // R_Ankle_pitch_joint
+        standupAngle[6] = -0 * D2R;    // R_Hip_yaw_joint
+        standupAngle[7] = -0 * D2R;    // R_Hip_roll_joint
+        standupAngle[8] = -40 * D2R;   // R_Hip_pitch_joint
+        standupAngle[9] = -110 * D2R;   // R_Knee_joint
+        standupAngle[10] = 85 * D2R; // R_Ankle_pitch_joint
         standupAngle[11] = 0 * D2R;   // R_Ankle_roll_joint
 
         standupAngle[12] = (-100+5) * D2R;  // L_shoulder_pitch_joint
@@ -1982,7 +2011,7 @@ void CKubot::standupBack(float standupTime)
         standupAngle[14] = -3 * D2R;    // L_hand_pitch_joint
         standupAngle[15] = (-100+5) * D2R;  // R_shoulder_pitch_joint
         standupAngle[16] = -165 * D2R; // R_elbow_roll_joint
-        standupAngle[17] = -3 * D2R;    // R_hand_pitch_joint
+        standupAngle[17] = 3 * D2R;    // R_hand_pitch_joint
         standupAngle[18] = 0 * D2R;    // Nfeck_yaw_joint
         standupAngle[19] = 0 * D2R;    // head_pitch_joint
         if (STUtime == 0 && motion_10 == false)
@@ -2018,18 +2047,18 @@ void CKubot::standupBack(float standupTime)
  else if (STUtime >= 0 && motion_11 == false)
     {
 
-        standupAngle[0] = 0 * D2R;    // L_Hip_yaw_joint
-        standupAngle[1] = 0 * D2R;    // L_Hip_roll_joint
+        standupAngle[0] = -0 * D2R;    // L_Hip_yaw_joint
+        standupAngle[1] = -0 * D2R;    // L_Hip_roll_joint
         standupAngle[2] = (0) * D2R;   // L_Hip_pitch_joint
         standupAngle[3] = 105 * D2R;   // L_Knee_joint
         standupAngle[4] = (-85) * D2R;  // L_Ankle_pitch_joint
         standupAngle[5] = 0 * D2R;    // L_Ankle_roll_joint
         
-        standupAngle[6] = 0 * D2R;    // R_Hip_yaw_joint
-        standupAngle[7] = 0 * D2R;    // R_Hip_roll_joint
-        standupAngle[8] = (0) * D2R;   // R_Hip_pitch_joint
-        standupAngle[9] = 105 * D2R;   // R_Knee_joint
-        standupAngle[10] = (-85) * D2R; // R_Ankle_pitch_joint
+        standupAngle[6] = -0 * D2R;    // R_Hip_yaw_joint
+        standupAngle[7] = -0 * D2R;    // R_Hip_roll_joint
+        standupAngle[8] = -0 * D2R;   // R_Hip_pitch_joint
+        standupAngle[9] = -105 * D2R;   // R_Knee_joint
+        standupAngle[10] = 85 * D2R; // R_Ankle_pitch_joint
         standupAngle[11] = 0 * D2R;   // R_Ankle_roll_joint
 
         standupAngle[12] = (-100+5) * D2R;  // L_shoulder_pitch_joint
@@ -2037,7 +2066,7 @@ void CKubot::standupBack(float standupTime)
         standupAngle[14] = -3 * D2R;    // L_hand_pitch_joint
         standupAngle[15] = (-100+5) * D2R;  // R_shoulder_pitch_joint
         standupAngle[16] = -165 * D2R; // R_elbow_roll_joint
-        standupAngle[17] = -3 * D2R;    // R_hand_pitch_joint
+        standupAngle[17] = 3 * D2R;    // R_hand_pitch_joint
         standupAngle[18] = 0 * D2R;    // Nfeck_yaw_joint
         standupAngle[19] = 0 * D2R;    // head_pitch_joint
         if (STUtime == 0 && motion_11 == false)
@@ -2073,18 +2102,18 @@ void CKubot::standupBack(float standupTime)
     else if (STUtime >= 0 && motion_12 == false)
     {
 
-        standupAngle[0] = 0 * D2R;    // L_Hip_yaw_joint
-        standupAngle[1] = 0 * D2R;    // L_Hip_roll_joint
+        standupAngle[0] = -0 * D2R;    // L_Hip_yaw_joint
+        standupAngle[1] = -0 * D2R;    // L_Hip_roll_joint
         standupAngle[2] = (-28 -7)* D2R;   // L_Hip_pitch_joint
         standupAngle[3] = (95) * D2R;   // L_Knee_joint
         standupAngle[4] = (-74+10) * D2R;  // L_Ankle_pitch_joint
         standupAngle[5] = 0 * D2R;    // L_Ankle_roll_joint
         
-        standupAngle[6] = 0 * D2R;    // R_Hip_yaw_joint
-        standupAngle[7] = 0 * D2R;    // R_Hip_roll_joint
-        standupAngle[8] = (-28-7) * D2R;   // R_Hip_pitch_joint
-        standupAngle[9] = (95) * D2R;   // R_Knee_joint
-        standupAngle[10] = (-74+10) * D2R; // R_Ankle_pitch_joint
+        standupAngle[6] = -0 * D2R;    // R_Hip_yaw_joint
+        standupAngle[7] = -0 * D2R;    // R_Hip_roll_joint
+        standupAngle[8] = -((-28-7) * D2R);   // R_Hip_pitch_joint
+        standupAngle[9] = -95 * D2R;   // R_Knee_joint
+        standupAngle[10] = -((-74+10) * D2R); // R_Ankle_pitch_joint
         standupAngle[11] = 0 * D2R;   // R_Ankle_roll_joint
         
 
@@ -2093,7 +2122,7 @@ void CKubot::standupBack(float standupTime)
         standupAngle[14] = -3 * D2R;    // L_hand_pitch_joint
         standupAngle[15] = -100 * D2R;  // R_shoulder_pitch_joint
         standupAngle[16] = -165 * D2R; // R_elbow_roll_joint
-        standupAngle[17] = -3 * D2R;    // R_hand_pitch_joint
+        standupAngle[17] = 3 * D2R;    // R_hand_pitch_joint
         standupAngle[18] = 0 * D2R;    // Nfeck_yaw_joint
         standupAngle[19] = 0 * D2R;    // head_pitch_joint
        
@@ -2128,18 +2157,18 @@ void CKubot::standupBack(float standupTime)
     else if (STUtime >= 0 && motion_13 == false)
     {
 
-        standupAngle[0] =  -0.000000 * D2R;  // L_Hip_yaw_joint
-        standupAngle[1] =   0.000000 * D2R;  // L_Hip_roll_joint
+        standupAngle[0] = 0 * D2R;  // L_Hip_yaw_joint
+        standupAngle[1] = -0 * D2R;  // L_Hip_roll_joint
         standupAngle[2] = -18.566634 * D2R;  // L_Hip_pitch_joint  
         standupAngle[3] =  51.762401 * D2R;  // L_Knee_joint
         standupAngle[4] = -33.195765 * D2R;  // L_Ankle_pitch_joint  //39
         standupAngle[5] =   0.000000 * D2R;  // L_Ankle_roll_joint
  
-        standupAngle[6] =  -0.000000 * D2R;  // R_Hip_yaw_joint
-        standupAngle[7] =   0.000000 * D2R;  // R_Hip_roll_joint
-        standupAngle[8] = -18.566634 * D2R;  // R_Hip_pitch_joint
-        standupAngle[9] =  51.762401 * D2R;  // R_Knee_joint
-        standupAngle[10]= -33.195765 * D2R;  // R_Ankle_pitch_joint  //39, 44
+        standupAngle[6] = 0 * D2R;  // R_Hip_yaw_joint
+        standupAngle[7] = -0 * D2R;  // R_Hip_roll_joint
+        standupAngle[8] = 18.5666 * D2R;  // R_Hip_pitch_joint
+        standupAngle[9] = -51.7624 * D2R;  // R_Knee_joint
+        standupAngle[10] = 33.1958 * D2R;  // R_Ankle_pitch_joint  //39, 44
         standupAngle[11]=   0.000000 * D2R;  // R_Ankle_roll_joint
 
         standupAngle[12]= (0 * D2R); /// L_shoulder_pitch_joint 플러스가 어깨 뒤로
@@ -2147,7 +2176,7 @@ void CKubot::standupBack(float standupTime)
         standupAngle[14]= (-110 * D2R);/// L_hand_pitch_joint  플러스가 안으로 굽
         standupAngle[15]= (0 * D2R); /// R_shoulder_pitch_joint
         standupAngle[16]= (-0 * D2R);   // R_elbow_roll_joint
-        standupAngle[17]= (-110 * D2R);// R_hand_pitch_joint
+        standupAngle[17] = -((-110 * D2R));// R_hand_pitch_joint
         standupAngle[18]= (0 * D2R);  // Neck_yaw_joint
         standupAngle[19]= (65 * D2R);  /// head_pitch_joint //55
         // std::cout << "STUtime : \n" << STUtime << std::endl;
@@ -2217,8 +2246,8 @@ void CKubot::GOALKEEPER(float readytime)
     if (time < readytime && Move_current == false)
     {
        
-        refAngle[1] = cosWave(-15*D2R, readytime, time, angle1[1]);
-        refAngle[7] = cosWave(15*D2R, readytime, time, angle1[7]);
+        refAngle[1] = cosWave(15 * D2R, readytime, time, angle1[1]);
+        refAngle[7] = cosWave(-15 * D2R, readytime, time, angle1[7]);
         refAngle[5] = cosWave(15*D2R, readytime, time, angle1[5]);
         refAngle[11] = cosWave(-15*D2R, readytime, time, angle1[11]);
 
@@ -2226,15 +2255,15 @@ void CKubot::GOALKEEPER(float readytime)
         refAngle[3] = cosWave(40*D2R, readytime, time, angle1[3]);
         refAngle[4] = cosWave(-20*D2R, readytime, time, angle1[4]);
             
-        refAngle[8] = cosWave(-20*D2R, readytime, time, angle1[8]);
-        refAngle[9] = cosWave(40*D2R, readytime, time, angle1[9]);
-        refAngle[10] = cosWave(-20*D2R, readytime, time, angle1[10]);
+        refAngle[8] = cosWave(20 * D2R, readytime, time, angle1[8]);
+        refAngle[9] = cosWave(-40 * D2R, readytime, time, angle1[9]);
+        refAngle[10] = cosWave(20 * D2R, readytime, time, angle1[10]);
 
 
         refAngle[13] = cosWave(40*D2R, readytime, time, angle1[13]);
         refAngle[16] = cosWave(-40*D2R, readytime, time, angle1[16]);
         refAngle[14] = cosWave(-30*D2R, readytime, time, angle1[14]);
-        refAngle[17] = cosWave(-30*D2R, readytime, time, angle1[17]);
+        refAngle[17] = cosWave(30 * D2R, readytime, time, angle1[17]);
         refAngle[12] = cosWave(-20*D2R, readytime, time, angle1[12]);
         refAngle[15] = cosWave(-20*D2R, readytime, time, angle1[15]);
 
@@ -2303,17 +2332,17 @@ void CKubot::walkingphysics(float readytime)
             targetAngle[3] = 20.0 * D2R;
             targetAngle[4] = -15.0 * D2R;
 
-            targetAngle[7] = -10.0 * D2R;
+            targetAngle[7] = 10 * D2R;
             targetAngle[8] = -45.0 * D2R; 
             targetAngle[9] = 45.0 * D2R; 
-            targetAngle[10] = -15.0 * D2R;
+            targetAngle[10] = 15 * D2R;
 
             targetAngle[12] = -45.0 * D2R;
             targetAngle[14] = -45.0 * D2R;
 
             targetAngle[15] = 15.0 * D2R;
             targetAngle[16] = -10.0 * D2R;
-            targetAngle[17] = -45.0 * D2R;
+            targetAngle[17] = 45 * D2R;
         }
 
         if (time < readytime)
@@ -2371,11 +2400,11 @@ void CKubot::walkingphysics(float readytime)
 
             targetAngle[7] = 10.0 * D2R; 
             targetAngle[11] = -10.0 * D2R;
-            targetAngle[8] = -15.0 * D2R;
-            targetAngle[9] = 20.0 * D2R;
-            targetAngle[10] = -15.0 * D2R;
+            targetAngle[8] = 15 * D2R;
+            targetAngle[9] = -20 * D2R;
+            targetAngle[10] = 15 * D2R;
 
-            targetAngle[1] = 10.0 * D2R;
+            targetAngle[1] = -10 * D2R;
             targetAngle[2] = -45.0 * D2R; 
             targetAngle[3] = 45.0 * D2R;
             targetAngle[4] = -15.0 * D2R; 
@@ -2480,7 +2509,7 @@ void CKubot::upperbodytest(float upperT)
 
     uppertestAngle[15] = (-30 * D2R);  // R_shoulder_pitch_joint
     uppertestAngle[16] = (-15 * D2R);  // R_elbow_roll_joint
-    uppertestAngle[17] = (-130 * D2R); // R_hand_pitch_joint
+    uppertestAngle[17] = -((-130 * D2R)); // R_hand_pitch_joint
 
     uppertestAngle[18] = (0 * D2R); // Neck_yaw_joint
     uppertestAngle[19] = (0 * D2R); // head_pitch_joint
