@@ -1,9 +1,9 @@
 <?xml version="1.0" ?>
-<!-- RoboCup Humanoid League KidSize 축구장
-     scripts/gen_field.py 로 생성. 수치는 그 파일의 FIELD 딕셔너리에서 수정.
-     필드 9.0 x 6.0 m, 보더 1.0 m, 골 2.6 x 1.2 m (깊이 0.6 m) -->
+<!-- RoboCup Humanoid Soccer League (small) 축구장
+     scripts/gen_field.py 로 생성. 수치 출처: 공식 룰북 field_diagram_macros.tex
+     필드 9.0 x 6.0 m, 보더 1.0 m, 골 1.8 x 1.2 m (깊이 0.5 m) -->
 <sdf version="1.6">
-  <world name="robocup_kidsize">
+  <world name="robocup_hsl_small">
 
     <physics name="default_physics" default="0" type="ode">
       <max_step_size>0.001</max_step_size>
@@ -36,28 +36,28 @@
     <link name="touch_p">
       <pose>0.0000 3.0000 0.0225 0 0 0</pose>
       <visual name="touch_p_vis">
-        <geometry><box><size>9.05 0.05 0.005</size></box></geometry>
+        <geometry><box><size>9.1 0.05 0.005</size></box></geometry>
         <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
       </visual>
     </link>
     <link name="goalline_p">
       <pose>4.5000 0.0000 0.0225 0 0 0</pose>
       <visual name="goalline_p_vis">
-        <geometry><box><size>0.05 6.05 0.005</size></box></geometry>
+        <geometry><box><size>0.1 6.05 0.005</size></box></geometry>
         <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
       </visual>
     </link>
     <link name="touch_n">
       <pose>0.0000 -3.0000 0.0225 0 0 0</pose>
       <visual name="touch_n_vis">
-        <geometry><box><size>9.05 0.05 0.005</size></box></geometry>
+        <geometry><box><size>9.1 0.05 0.005</size></box></geometry>
         <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
       </visual>
     </link>
     <link name="goalline_n">
       <pose>-4.5000 0.0000 0.0225 0 0 0</pose>
       <visual name="goalline_n_vis">
-        <geometry><box><size>0.05 6.05 0.005</size></box></geometry>
+        <geometry><box><size>0.1 6.05 0.005</size></box></geometry>
         <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
       </visual>
     </link>
@@ -92,19 +92,19 @@
     <link name="penarea_p_front">
       <pose>2.5000 0.0000 0.0225 0 0 0</pose>
       <visual name="penarea_p_front_vis">
-        <geometry><box><size>0.05 5.05 0.005</size></box></geometry>
+        <geometry><box><size>0.05 4.05 0.005</size></box></geometry>
         <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
       </visual>
     </link>
     <link name="penarea_p_sidep">
-      <pose>3.5000 2.5000 0.0225 0 0 0</pose>
+      <pose>3.5000 2.0000 0.0225 0 0 0</pose>
       <visual name="penarea_p_sidep_vis">
         <geometry><box><size>2.0 0.05 0.005</size></box></geometry>
         <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
       </visual>
     </link>
     <link name="penarea_p_siden">
-      <pose>3.5000 -2.5000 0.0225 0 0 0</pose>
+      <pose>3.5000 -2.0000 0.0225 0 0 0</pose>
       <visual name="penarea_p_siden_vis">
         <geometry><box><size>2.0 0.05 0.005</size></box></geometry>
         <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
@@ -134,19 +134,19 @@
     <link name="penarea_n_front">
       <pose>-2.5000 0.0000 0.0225 0 0 0</pose>
       <visual name="penarea_n_front_vis">
-        <geometry><box><size>0.05 5.05 0.005</size></box></geometry>
+        <geometry><box><size>0.05 4.05 0.005</size></box></geometry>
         <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
       </visual>
     </link>
     <link name="penarea_n_sidep">
-      <pose>-3.5000 2.5000 0.0225 0 0 0</pose>
+      <pose>-3.5000 2.0000 0.0225 0 0 0</pose>
       <visual name="penarea_n_sidep_vis">
         <geometry><box><size>2.0 0.05 0.005</size></box></geometry>
         <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
       </visual>
     </link>
     <link name="penarea_n_siden">
-      <pose>-3.5000 -2.5000 0.0225 0 0 0</pose>
+      <pose>-3.5000 -2.0000 0.0225 0 0 0</pose>
       <visual name="penarea_n_siden_vis">
         <geometry><box><size>2.0 0.05 0.005</size></box></geometry>
         <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
@@ -678,7 +678,7 @@
       </visual>
     </link>
     <link name="post_p_p">
-      <pose>4.5000 1.3500 0.6200 0 0 0</pose>
+      <pose>4.5000 0.9500 0.6200 0 0 0</pose>
       <visual name="post_p_p_vis">
         <geometry><cylinder><radius>0.05</radius><length>1.2</length></cylinder></geometry>
         <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
@@ -688,7 +688,7 @@
       </collision>
     </link>
     <link name="post_p_n">
-      <pose>4.5000 -1.3500 0.6200 0 0 0</pose>
+      <pose>4.5000 -0.9500 0.6200 0 0 0</pose>
       <visual name="post_p_n_vis">
         <geometry><cylinder><radius>0.05</radius><length>1.2</length></cylinder></geometry>
         <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
@@ -700,22 +700,22 @@
     <link name="crossbar_p">
       <pose>4.5000 0.0000 1.2700 0 0 0</pose>
       <visual name="crossbar_p_vis">
-        <geometry><box><size>0.1 2.8000000000000003 0.1</size></box></geometry>
+        <geometry><box><size>0.1 2.0 0.1</size></box></geometry>
         <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
       </visual>
       <collision name="crossbar_p_col">
-        <geometry><box><size>0.1 2.8000000000000003 0.1</size></box></geometry>
+        <geometry><box><size>0.1 2.0 0.1</size></box></geometry>
       </collision>
     </link>
     <link name="net_p">
-      <pose>5.1000 0.0000 0.6200 0 0 0</pose>
+      <pose>5.0000 0.0000 0.6200 0 0 0</pose>
       <visual name="net_p_vis">
-        <geometry><box><size>0.02 2.8000000000000003 1.2</size></box></geometry>
+        <geometry><box><size>0.02 2.0 1.2</size></box></geometry>
         <material><ambient>0.85 0.85 0.85 0.35</ambient><diffuse>0.85 0.85 0.85 0.35</diffuse></material>
       </visual>
     </link>
     <link name="post_n_p">
-      <pose>-4.5000 1.3500 0.6200 0 0 0</pose>
+      <pose>-4.5000 0.9500 0.6200 0 0 0</pose>
       <visual name="post_n_p_vis">
         <geometry><cylinder><radius>0.05</radius><length>1.2</length></cylinder></geometry>
         <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
@@ -725,7 +725,7 @@
       </collision>
     </link>
     <link name="post_n_n">
-      <pose>-4.5000 -1.3500 0.6200 0 0 0</pose>
+      <pose>-4.5000 -0.9500 0.6200 0 0 0</pose>
       <visual name="post_n_n_vis">
         <geometry><cylinder><radius>0.05</radius><length>1.2</length></cylinder></geometry>
         <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
@@ -737,17 +737,17 @@
     <link name="crossbar_n">
       <pose>-4.5000 0.0000 1.2700 0 0 0</pose>
       <visual name="crossbar_n_vis">
-        <geometry><box><size>0.1 2.8000000000000003 0.1</size></box></geometry>
+        <geometry><box><size>0.1 2.0 0.1</size></box></geometry>
         <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
       </visual>
       <collision name="crossbar_n_col">
-        <geometry><box><size>0.1 2.8000000000000003 0.1</size></box></geometry>
+        <geometry><box><size>0.1 2.0 0.1</size></box></geometry>
       </collision>
     </link>
     <link name="net_n">
-      <pose>-5.1000 0.0000 0.6200 0 0 0</pose>
+      <pose>-5.0000 0.0000 0.6200 0 0 0</pose>
       <visual name="net_n_vis">
-        <geometry><box><size>0.02 2.8000000000000003 1.2</size></box></geometry>
+        <geometry><box><size>0.02 2.0 1.2</size></box></geometry>
         <material><ambient>0.85 0.85 0.85 0.35</ambient><diffuse>0.85 0.85 0.85 0.35</diffuse></material>
       </visual>
     </link>

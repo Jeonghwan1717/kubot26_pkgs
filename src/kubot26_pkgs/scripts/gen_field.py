@@ -1,28 +1,51 @@
 #!/usr/bin/env python3
 """
-RoboCup Humanoid League KidSize 축구장 SDF 생성기.
+RoboCup Humanoid Soccer League (HSL) 축구장 SDF 생성기.
 
-수치는 아래 FIELD 딕셔너리만 고치면 된다. 연도별 룰북에 맞춰 대조할 것.
-사용: python3 scripts/gen_field.py > worlds/robocup_kidsize.world
+수치 출처: 공식 룰북 저장소 rules/field_diagram_macros.tex
+  https://github.com/RoboCup-HumanoidSoccerLeague/HSL-Rules
+  (2026-06-29 커밋 = RoboCup 2026 인천 대회 최종본)
+
+2026 년부터 Humanoid League 와 Standard Platform League 가 HSL 로 통합되어
+체급 구분이 KidSize/TeenSize/AdultSize -> small/mid/large 로 바뀌었다.
+
+  디비전   최대 신장   최대 중량
+  small    110 cm      15 kg
+  mid      125 cm      25 kg
+  large    무제한      무제한
+
+kubot26 은 기립 높이 43 cm / 5.5 kg 이므로 small 디비전.
+
+사용:
+  python3 scripts/gen_field.py           > worlds/robocup_hsl_small.world
+  python3 scripts/gen_field.py mid       > worlds/robocup_hsl_mid.world
+  python3 scripts/gen_field.py large     > worlds/robocup_hsl_large.world
 """
+import sys
 import math
 
-# ── KidSize 규격 [m] ─────────────────────────────────────────────
-FIELD = dict(
-    A = 9.0,     # 필드 길이 (라인 안쪽)
-    B = 6.0,     # 필드 폭
-    C = 0.6,     # 골 깊이
-    D = 2.6,     # 골 폭 (골포스트 안쪽)
-    E = 1.2,     # 골 높이
-    F = 1.0,     # 골에어리어 길이
-    G = 3.0,     # 골에어리어 폭
-    H = 1.5,     # 페널티 마크 ~ 골라인 거리
-    I = 1.5,     # 센터서클 지름
-    J = 1.0,     # 외곽 여유(보더)
-    K = 2.0,     # 페널티에어리어 길이
-    L = 5.0,     # 페널티에어리어 폭
-    line_w = 0.05,   # 라인 폭
-)
+# ── HSL 디비전별 공식 규격 [m] (field_diagram_macros.tex) ──────────
+DIVISIONS = {
+    'small': dict(A=9.0,  B=6.0,  C=0.5, D=1.8, E=1.2,
+                  F=1.0, G=3.0, H=1.5, I=1.5, J=1.0, K=2.0, L=4.0,
+                  line_w=0.05, goal_line_w=0.10, corner_r=0.0),
+    'mid':   dict(A=14.0, B=9.0,  C=0.7, D=2.4, E=1.5,
+                  F=1.0, G=4.0, H=2.0, I=3.0, J=1.0, K=3.0, L=6.0,
+                  line_w=0.05, goal_line_w=0.10, corner_r=0.5),
+    'large': dict(A=22.0, B=14.0, C=0.6, D=2.4, E=1.8,
+                  F=1.0, G=4.0, H=2.5, I=4.0, J=1.0, K=3.5, L=7.0,
+                  line_w=0.12, goal_line_w=0.20, corner_r=1.0),
+}
+#  A 필드 길이 / B 필드 폭 / C 골 깊이 / D 골 폭 / E 골 높이
+#  F 골에어리어 길이 / G 골에어리어 폭 / H 페널티마크 거리 / I 센터서클 지름
+#  J 보더 / K 페널티에어리어 길이 / L 페널티에어리어 폭
+#  [주의] E(골 높이)는 룰북 매크로에 없어 별도 확인 필요. 아래 값은 잠정치다.
+
+DIVISION = sys.argv[1] if len(sys.argv) > 1 else 'small'
+if DIVISION not in DIVISIONS:
+    sys.exit(f"알 수 없는 디비전: {DIVISION} (small|mid|large)")
+FIELD = DIVISIONS[DIVISION]
+
 LINE_T   = 0.005   # 라인 두께(높이)
 POST_R   = 0.05    # 골포스트 반지름
 BALL_R   = 0.065   # FIFA size 1 공 반지름
@@ -69,9 +92,10 @@ def main():
     parts.append(box("carpet", A+2*J, B+2*J, CARPET_T, 0, 0, CARPET_T/2, GREEN, collide=True))
 
     # 터치라인(긴 변) / 골라인(짧은 변)
+    glw = f['goal_line_w']          # 골라인은 다른 라인보다 두껍다
     for s in (+1,-1):
-        parts.append(box(f"touch_{'p' if s>0 else 'n'}", A+lw, lw, LINE_T, 0,  s*B/2, LZ, WHITE))
-        parts.append(box(f"goalline_{'p' if s>0 else 'n'}", lw, B+lw, LINE_T, s*A/2, 0, LZ, WHITE))
+        parts.append(box(f"touch_{'p' if s>0 else 'n'}", A+glw, lw, LINE_T, 0,  s*B/2, LZ, WHITE))
+        parts.append(box(f"goalline_{'p' if s>0 else 'n'}", glw, B+lw, LINE_T, s*A/2, 0, LZ, WHITE))
     # 하프웨이 라인
     parts.append(box("halfway", lw, B+lw, LINE_T, 0, 0, LZ, WHITE))
 
@@ -122,11 +146,11 @@ def main():
 
     field = "".join(parts)
     print(f"""<?xml version="1.0" ?>
-<!-- RoboCup Humanoid League KidSize 축구장
-     scripts/gen_field.py 로 생성. 수치는 그 파일의 FIELD 딕셔너리에서 수정.
+<!-- RoboCup Humanoid Soccer League ({DIVISION}) 축구장
+     scripts/gen_field.py 로 생성. 수치 출처: 공식 룰북 field_diagram_macros.tex
      필드 {A} x {B} m, 보더 {J} m, 골 {D} x {E} m (깊이 {C} m) -->
 <sdf version="1.6">
-  <world name="robocup_kidsize">
+  <world name="robocup_hsl_{DIVISION}">
 
     <physics name="default_physics" default="0" type="ode">
       <max_step_size>0.001</max_step_size>

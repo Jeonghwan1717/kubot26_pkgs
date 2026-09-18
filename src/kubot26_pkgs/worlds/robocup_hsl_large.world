@@ -1,0 +1,780 @@
+<?xml version="1.0" ?>
+<!-- RoboCup Humanoid Soccer League (large) 축구장
+     scripts/gen_field.py 로 생성. 수치 출처: 공식 룰북 field_diagram_macros.tex
+     필드 22.0 x 14.0 m, 보더 1.0 m, 골 2.4 x 1.8 m (깊이 0.6 m) -->
+<sdf version="1.6">
+  <world name="robocup_hsl_large">
+
+    <physics name="default_physics" default="0" type="ode">
+      <max_step_size>0.001</max_step_size>
+      <real_time_factor>1</real_time_factor>
+      <real_time_update_rate>1000</real_time_update_rate>
+      <ode>
+        <solver>
+          <type>quick</type>
+          <iters>100</iters>
+          <sor>1.0</sor>
+          <use_dynamic_moi_rescaling>true</use_dynamic_moi_rescaling>
+        </solver>
+      </ode>
+    </physics>
+
+    <include><uri>model://sun</uri></include>
+
+    <model name="field">
+      <static>true</static>
+    <link name="carpet">
+      <pose>0.0000 0.0000 0.0100 0 0 0</pose>
+      <visual name="carpet_vis">
+        <geometry><box><size>24.0 16.0 0.02</size></box></geometry>
+        <material><ambient>0.12 0.45 0.15 1</ambient><diffuse>0.12 0.45 0.15 1</diffuse></material>
+      </visual>
+      <collision name="carpet_col">
+        <geometry><box><size>24.0 16.0 0.02</size></box></geometry>
+      </collision>
+    </link>
+    <link name="touch_p">
+      <pose>0.0000 7.0000 0.0225 0 0 0</pose>
+      <visual name="touch_p_vis">
+        <geometry><box><size>22.2 0.12 0.005</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
+      </visual>
+    </link>
+    <link name="goalline_p">
+      <pose>11.0000 0.0000 0.0225 0 0 0</pose>
+      <visual name="goalline_p_vis">
+        <geometry><box><size>0.2 14.12 0.005</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
+      </visual>
+    </link>
+    <link name="touch_n">
+      <pose>0.0000 -7.0000 0.0225 0 0 0</pose>
+      <visual name="touch_n_vis">
+        <geometry><box><size>22.2 0.12 0.005</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
+      </visual>
+    </link>
+    <link name="goalline_n">
+      <pose>-11.0000 0.0000 0.0225 0 0 0</pose>
+      <visual name="goalline_n_vis">
+        <geometry><box><size>0.2 14.12 0.005</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
+      </visual>
+    </link>
+    <link name="halfway">
+      <pose>0.0000 0.0000 0.0225 0 0 0</pose>
+      <visual name="halfway_vis">
+        <geometry><box><size>0.12 14.12 0.005</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
+      </visual>
+    </link>
+    <link name="goalarea_p_front">
+      <pose>10.0000 0.0000 0.0225 0 0 0</pose>
+      <visual name="goalarea_p_front_vis">
+        <geometry><box><size>0.12 4.12 0.005</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
+      </visual>
+    </link>
+    <link name="goalarea_p_sidep">
+      <pose>10.5000 2.0000 0.0225 0 0 0</pose>
+      <visual name="goalarea_p_sidep_vis">
+        <geometry><box><size>1.0 0.12 0.005</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
+      </visual>
+    </link>
+    <link name="goalarea_p_siden">
+      <pose>10.5000 -2.0000 0.0225 0 0 0</pose>
+      <visual name="goalarea_p_siden_vis">
+        <geometry><box><size>1.0 0.12 0.005</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
+      </visual>
+    </link>
+    <link name="penarea_p_front">
+      <pose>7.5000 0.0000 0.0225 0 0 0</pose>
+      <visual name="penarea_p_front_vis">
+        <geometry><box><size>0.12 7.12 0.005</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
+      </visual>
+    </link>
+    <link name="penarea_p_sidep">
+      <pose>9.2500 3.5000 0.0225 0 0 0</pose>
+      <visual name="penarea_p_sidep_vis">
+        <geometry><box><size>3.5 0.12 0.005</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
+      </visual>
+    </link>
+    <link name="penarea_p_siden">
+      <pose>9.2500 -3.5000 0.0225 0 0 0</pose>
+      <visual name="penarea_p_siden_vis">
+        <geometry><box><size>3.5 0.12 0.005</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
+      </visual>
+    </link>
+    <link name="goalarea_n_front">
+      <pose>-10.0000 0.0000 0.0225 0 0 0</pose>
+      <visual name="goalarea_n_front_vis">
+        <geometry><box><size>0.12 4.12 0.005</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
+      </visual>
+    </link>
+    <link name="goalarea_n_sidep">
+      <pose>-10.5000 2.0000 0.0225 0 0 0</pose>
+      <visual name="goalarea_n_sidep_vis">
+        <geometry><box><size>1.0 0.12 0.005</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
+      </visual>
+    </link>
+    <link name="goalarea_n_siden">
+      <pose>-10.5000 -2.0000 0.0225 0 0 0</pose>
+      <visual name="goalarea_n_siden_vis">
+        <geometry><box><size>1.0 0.12 0.005</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
+      </visual>
+    </link>
+    <link name="penarea_n_front">
+      <pose>-7.5000 0.0000 0.0225 0 0 0</pose>
+      <visual name="penarea_n_front_vis">
+        <geometry><box><size>0.12 7.12 0.005</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
+      </visual>
+    </link>
+    <link name="penarea_n_sidep">
+      <pose>-9.2500 3.5000 0.0225 0 0 0</pose>
+      <visual name="penarea_n_sidep_vis">
+        <geometry><box><size>3.5 0.12 0.005</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
+      </visual>
+    </link>
+    <link name="penarea_n_siden">
+      <pose>-9.2500 -3.5000 0.0225 0 0 0</pose>
+      <visual name="penarea_n_siden_vis">
+        <geometry><box><size>3.5 0.12 0.005</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
+      </visual>
+    </link>
+    <link name="circle_0">
+      <pose>1.9981 0.0872 0.0225 0 0 1.61443</pose>
+      <visual name="circle_0_vis">
+        <geometry><box><size>0.12 0.2945 0.005</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
+      </visual>
+    </link>
+    <link name="circle_1">
+      <pose>1.9829 0.2611 0.0225 0 0 1.70170</pose>
+      <visual name="circle_1_vis">
+        <geometry><box><size>0.12 0.2945 0.005</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
+      </visual>
+    </link>
+    <link name="circle_2">
+      <pose>1.9526 0.4329 0.0225 0 0 1.78896</pose>
+      <visual name="circle_2_vis">
+        <geometry><box><size>0.12 0.2945 0.005</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
+      </visual>
+    </link>
+    <link name="circle_3">
+      <pose>1.9074 0.6014 0.0225 0 0 1.87623</pose>
+      <visual name="circle_3_vis">
+        <geometry><box><size>0.12 0.2945 0.005</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
+      </visual>
+    </link>
+    <link name="circle_4">
+      <pose>1.8478 0.7654 0.0225 0 0 1.96350</pose>
+      <visual name="circle_4_vis">
+        <geometry><box><size>0.12 0.2945 0.005</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
+      </visual>
+    </link>
+    <link name="circle_5">
+      <pose>1.7740 0.9235 0.0225 0 0 2.05076</pose>
+      <visual name="circle_5_vis">
+        <geometry><box><size>0.12 0.2945 0.005</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
+      </visual>
+    </link>
+    <link name="circle_6">
+      <pose>1.6868 1.0746 0.0225 0 0 2.13803</pose>
+      <visual name="circle_6_vis">
+        <geometry><box><size>0.12 0.2945 0.005</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
+      </visual>
+    </link>
+    <link name="circle_7">
+      <pose>1.5867 1.2175 0.0225 0 0 2.22529</pose>
+      <visual name="circle_7_vis">
+        <geometry><box><size>0.12 0.2945 0.005</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
+      </visual>
+    </link>
+    <link name="circle_8">
+      <pose>1.4746 1.3512 0.0225 0 0 2.31256</pose>
+      <visual name="circle_8_vis">
+        <geometry><box><size>0.12 0.2945 0.005</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
+      </visual>
+    </link>
+    <link name="circle_9">
+      <pose>1.3512 1.4746 0.0225 0 0 2.39983</pose>
+      <visual name="circle_9_vis">
+        <geometry><box><size>0.12 0.2945 0.005</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
+      </visual>
+    </link>
+    <link name="circle_10">
+      <pose>1.2175 1.5867 0.0225 0 0 2.48709</pose>
+      <visual name="circle_10_vis">
+        <geometry><box><size>0.12 0.2945 0.005</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
+      </visual>
+    </link>
+    <link name="circle_11">
+      <pose>1.0746 1.6868 0.0225 0 0 2.57436</pose>
+      <visual name="circle_11_vis">
+        <geometry><box><size>0.12 0.2945 0.005</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
+      </visual>
+    </link>
+    <link name="circle_12">
+      <pose>0.9235 1.7740 0.0225 0 0 2.66163</pose>
+      <visual name="circle_12_vis">
+        <geometry><box><size>0.12 0.2945 0.005</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
+      </visual>
+    </link>
+    <link name="circle_13">
+      <pose>0.7654 1.8478 0.0225 0 0 2.74889</pose>
+      <visual name="circle_13_vis">
+        <geometry><box><size>0.12 0.2945 0.005</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
+      </visual>
+    </link>
+    <link name="circle_14">
+      <pose>0.6014 1.9074 0.0225 0 0 2.83616</pose>
+      <visual name="circle_14_vis">
+        <geometry><box><size>0.12 0.2945 0.005</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
+      </visual>
+    </link>
+    <link name="circle_15">
+      <pose>0.4329 1.9526 0.0225 0 0 2.92343</pose>
+      <visual name="circle_15_vis">
+        <geometry><box><size>0.12 0.2945 0.005</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
+      </visual>
+    </link>
+    <link name="circle_16">
+      <pose>0.2611 1.9829 0.0225 0 0 3.01069</pose>
+      <visual name="circle_16_vis">
+        <geometry><box><size>0.12 0.2945 0.005</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
+      </visual>
+    </link>
+    <link name="circle_17">
+      <pose>0.0872 1.9981 0.0225 0 0 3.09796</pose>
+      <visual name="circle_17_vis">
+        <geometry><box><size>0.12 0.2945 0.005</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
+      </visual>
+    </link>
+    <link name="circle_18">
+      <pose>-0.0872 1.9981 0.0225 0 0 3.18523</pose>
+      <visual name="circle_18_vis">
+        <geometry><box><size>0.12 0.2945 0.005</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
+      </visual>
+    </link>
+    <link name="circle_19">
+      <pose>-0.2611 1.9829 0.0225 0 0 3.27249</pose>
+      <visual name="circle_19_vis">
+        <geometry><box><size>0.12 0.2945 0.005</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
+      </visual>
+    </link>
+    <link name="circle_20">
+      <pose>-0.4329 1.9526 0.0225 0 0 3.35976</pose>
+      <visual name="circle_20_vis">
+        <geometry><box><size>0.12 0.2945 0.005</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
+      </visual>
+    </link>
+    <link name="circle_21">
+      <pose>-0.6014 1.9074 0.0225 0 0 3.44703</pose>
+      <visual name="circle_21_vis">
+        <geometry><box><size>0.12 0.2945 0.005</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
+      </visual>
+    </link>
+    <link name="circle_22">
+      <pose>-0.7654 1.8478 0.0225 0 0 3.53429</pose>
+      <visual name="circle_22_vis">
+        <geometry><box><size>0.12 0.2945 0.005</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
+      </visual>
+    </link>
+    <link name="circle_23">
+      <pose>-0.9235 1.7740 0.0225 0 0 3.62156</pose>
+      <visual name="circle_23_vis">
+        <geometry><box><size>0.12 0.2945 0.005</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
+      </visual>
+    </link>
+    <link name="circle_24">
+      <pose>-1.0746 1.6868 0.0225 0 0 3.70882</pose>
+      <visual name="circle_24_vis">
+        <geometry><box><size>0.12 0.2945 0.005</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
+      </visual>
+    </link>
+    <link name="circle_25">
+      <pose>-1.2175 1.5867 0.0225 0 0 3.79609</pose>
+      <visual name="circle_25_vis">
+        <geometry><box><size>0.12 0.2945 0.005</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
+      </visual>
+    </link>
+    <link name="circle_26">
+      <pose>-1.3512 1.4746 0.0225 0 0 3.88336</pose>
+      <visual name="circle_26_vis">
+        <geometry><box><size>0.12 0.2945 0.005</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
+      </visual>
+    </link>
+    <link name="circle_27">
+      <pose>-1.4746 1.3512 0.0225 0 0 3.97062</pose>
+      <visual name="circle_27_vis">
+        <geometry><box><size>0.12 0.2945 0.005</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
+      </visual>
+    </link>
+    <link name="circle_28">
+      <pose>-1.5867 1.2175 0.0225 0 0 4.05789</pose>
+      <visual name="circle_28_vis">
+        <geometry><box><size>0.12 0.2945 0.005</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
+      </visual>
+    </link>
+    <link name="circle_29">
+      <pose>-1.6868 1.0746 0.0225 0 0 4.14516</pose>
+      <visual name="circle_29_vis">
+        <geometry><box><size>0.12 0.2945 0.005</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
+      </visual>
+    </link>
+    <link name="circle_30">
+      <pose>-1.7740 0.9235 0.0225 0 0 4.23242</pose>
+      <visual name="circle_30_vis">
+        <geometry><box><size>0.12 0.2945 0.005</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
+      </visual>
+    </link>
+    <link name="circle_31">
+      <pose>-1.8478 0.7654 0.0225 0 0 4.31969</pose>
+      <visual name="circle_31_vis">
+        <geometry><box><size>0.12 0.2945 0.005</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
+      </visual>
+    </link>
+    <link name="circle_32">
+      <pose>-1.9074 0.6014 0.0225 0 0 4.40696</pose>
+      <visual name="circle_32_vis">
+        <geometry><box><size>0.12 0.2945 0.005</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
+      </visual>
+    </link>
+    <link name="circle_33">
+      <pose>-1.9526 0.4329 0.0225 0 0 4.49422</pose>
+      <visual name="circle_33_vis">
+        <geometry><box><size>0.12 0.2945 0.005</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
+      </visual>
+    </link>
+    <link name="circle_34">
+      <pose>-1.9829 0.2611 0.0225 0 0 4.58149</pose>
+      <visual name="circle_34_vis">
+        <geometry><box><size>0.12 0.2945 0.005</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
+      </visual>
+    </link>
+    <link name="circle_35">
+      <pose>-1.9981 0.0872 0.0225 0 0 4.66876</pose>
+      <visual name="circle_35_vis">
+        <geometry><box><size>0.12 0.2945 0.005</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
+      </visual>
+    </link>
+    <link name="circle_36">
+      <pose>-1.9981 -0.0872 0.0225 0 0 4.75602</pose>
+      <visual name="circle_36_vis">
+        <geometry><box><size>0.12 0.2945 0.005</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
+      </visual>
+    </link>
+    <link name="circle_37">
+      <pose>-1.9829 -0.2611 0.0225 0 0 4.84329</pose>
+      <visual name="circle_37_vis">
+        <geometry><box><size>0.12 0.2945 0.005</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
+      </visual>
+    </link>
+    <link name="circle_38">
+      <pose>-1.9526 -0.4329 0.0225 0 0 4.93056</pose>
+      <visual name="circle_38_vis">
+        <geometry><box><size>0.12 0.2945 0.005</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
+      </visual>
+    </link>
+    <link name="circle_39">
+      <pose>-1.9074 -0.6014 0.0225 0 0 5.01782</pose>
+      <visual name="circle_39_vis">
+        <geometry><box><size>0.12 0.2945 0.005</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
+      </visual>
+    </link>
+    <link name="circle_40">
+      <pose>-1.8478 -0.7654 0.0225 0 0 5.10509</pose>
+      <visual name="circle_40_vis">
+        <geometry><box><size>0.12 0.2945 0.005</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
+      </visual>
+    </link>
+    <link name="circle_41">
+      <pose>-1.7740 -0.9235 0.0225 0 0 5.19235</pose>
+      <visual name="circle_41_vis">
+        <geometry><box><size>0.12 0.2945 0.005</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
+      </visual>
+    </link>
+    <link name="circle_42">
+      <pose>-1.6868 -1.0746 0.0225 0 0 5.27962</pose>
+      <visual name="circle_42_vis">
+        <geometry><box><size>0.12 0.2945 0.005</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
+      </visual>
+    </link>
+    <link name="circle_43">
+      <pose>-1.5867 -1.2175 0.0225 0 0 5.36689</pose>
+      <visual name="circle_43_vis">
+        <geometry><box><size>0.12 0.2945 0.005</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
+      </visual>
+    </link>
+    <link name="circle_44">
+      <pose>-1.4746 -1.3512 0.0225 0 0 5.45415</pose>
+      <visual name="circle_44_vis">
+        <geometry><box><size>0.12 0.2945 0.005</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
+      </visual>
+    </link>
+    <link name="circle_45">
+      <pose>-1.3512 -1.4746 0.0225 0 0 5.54142</pose>
+      <visual name="circle_45_vis">
+        <geometry><box><size>0.12 0.2945 0.005</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
+      </visual>
+    </link>
+    <link name="circle_46">
+      <pose>-1.2175 -1.5867 0.0225 0 0 5.62869</pose>
+      <visual name="circle_46_vis">
+        <geometry><box><size>0.12 0.2945 0.005</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
+      </visual>
+    </link>
+    <link name="circle_47">
+      <pose>-1.0746 -1.6868 0.0225 0 0 5.71595</pose>
+      <visual name="circle_47_vis">
+        <geometry><box><size>0.12 0.2945 0.005</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
+      </visual>
+    </link>
+    <link name="circle_48">
+      <pose>-0.9235 -1.7740 0.0225 0 0 5.80322</pose>
+      <visual name="circle_48_vis">
+        <geometry><box><size>0.12 0.2945 0.005</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
+      </visual>
+    </link>
+    <link name="circle_49">
+      <pose>-0.7654 -1.8478 0.0225 0 0 5.89049</pose>
+      <visual name="circle_49_vis">
+        <geometry><box><size>0.12 0.2945 0.005</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
+      </visual>
+    </link>
+    <link name="circle_50">
+      <pose>-0.6014 -1.9074 0.0225 0 0 5.97775</pose>
+      <visual name="circle_50_vis">
+        <geometry><box><size>0.12 0.2945 0.005</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
+      </visual>
+    </link>
+    <link name="circle_51">
+      <pose>-0.4329 -1.9526 0.0225 0 0 6.06502</pose>
+      <visual name="circle_51_vis">
+        <geometry><box><size>0.12 0.2945 0.005</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
+      </visual>
+    </link>
+    <link name="circle_52">
+      <pose>-0.2611 -1.9829 0.0225 0 0 6.15229</pose>
+      <visual name="circle_52_vis">
+        <geometry><box><size>0.12 0.2945 0.005</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
+      </visual>
+    </link>
+    <link name="circle_53">
+      <pose>-0.0872 -1.9981 0.0225 0 0 6.23955</pose>
+      <visual name="circle_53_vis">
+        <geometry><box><size>0.12 0.2945 0.005</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
+      </visual>
+    </link>
+    <link name="circle_54">
+      <pose>0.0872 -1.9981 0.0225 0 0 6.32682</pose>
+      <visual name="circle_54_vis">
+        <geometry><box><size>0.12 0.2945 0.005</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
+      </visual>
+    </link>
+    <link name="circle_55">
+      <pose>0.2611 -1.9829 0.0225 0 0 6.41409</pose>
+      <visual name="circle_55_vis">
+        <geometry><box><size>0.12 0.2945 0.005</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
+      </visual>
+    </link>
+    <link name="circle_56">
+      <pose>0.4329 -1.9526 0.0225 0 0 6.50135</pose>
+      <visual name="circle_56_vis">
+        <geometry><box><size>0.12 0.2945 0.005</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
+      </visual>
+    </link>
+    <link name="circle_57">
+      <pose>0.6014 -1.9074 0.0225 0 0 6.58862</pose>
+      <visual name="circle_57_vis">
+        <geometry><box><size>0.12 0.2945 0.005</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
+      </visual>
+    </link>
+    <link name="circle_58">
+      <pose>0.7654 -1.8478 0.0225 0 0 6.67588</pose>
+      <visual name="circle_58_vis">
+        <geometry><box><size>0.12 0.2945 0.005</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
+      </visual>
+    </link>
+    <link name="circle_59">
+      <pose>0.9235 -1.7740 0.0225 0 0 6.76315</pose>
+      <visual name="circle_59_vis">
+        <geometry><box><size>0.12 0.2945 0.005</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
+      </visual>
+    </link>
+    <link name="circle_60">
+      <pose>1.0746 -1.6868 0.0225 0 0 6.85042</pose>
+      <visual name="circle_60_vis">
+        <geometry><box><size>0.12 0.2945 0.005</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
+      </visual>
+    </link>
+    <link name="circle_61">
+      <pose>1.2175 -1.5867 0.0225 0 0 6.93768</pose>
+      <visual name="circle_61_vis">
+        <geometry><box><size>0.12 0.2945 0.005</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
+      </visual>
+    </link>
+    <link name="circle_62">
+      <pose>1.3512 -1.4746 0.0225 0 0 7.02495</pose>
+      <visual name="circle_62_vis">
+        <geometry><box><size>0.12 0.2945 0.005</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
+      </visual>
+    </link>
+    <link name="circle_63">
+      <pose>1.4746 -1.3512 0.0225 0 0 7.11222</pose>
+      <visual name="circle_63_vis">
+        <geometry><box><size>0.12 0.2945 0.005</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
+      </visual>
+    </link>
+    <link name="circle_64">
+      <pose>1.5867 -1.2175 0.0225 0 0 7.19948</pose>
+      <visual name="circle_64_vis">
+        <geometry><box><size>0.12 0.2945 0.005</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
+      </visual>
+    </link>
+    <link name="circle_65">
+      <pose>1.6868 -1.0746 0.0225 0 0 7.28675</pose>
+      <visual name="circle_65_vis">
+        <geometry><box><size>0.12 0.2945 0.005</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
+      </visual>
+    </link>
+    <link name="circle_66">
+      <pose>1.7740 -0.9235 0.0225 0 0 7.37402</pose>
+      <visual name="circle_66_vis">
+        <geometry><box><size>0.12 0.2945 0.005</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
+      </visual>
+    </link>
+    <link name="circle_67">
+      <pose>1.8478 -0.7654 0.0225 0 0 7.46128</pose>
+      <visual name="circle_67_vis">
+        <geometry><box><size>0.12 0.2945 0.005</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
+      </visual>
+    </link>
+    <link name="circle_68">
+      <pose>1.9074 -0.6014 0.0225 0 0 7.54855</pose>
+      <visual name="circle_68_vis">
+        <geometry><box><size>0.12 0.2945 0.005</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
+      </visual>
+    </link>
+    <link name="circle_69">
+      <pose>1.9526 -0.4329 0.0225 0 0 7.63582</pose>
+      <visual name="circle_69_vis">
+        <geometry><box><size>0.12 0.2945 0.005</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
+      </visual>
+    </link>
+    <link name="circle_70">
+      <pose>1.9829 -0.2611 0.0225 0 0 7.72308</pose>
+      <visual name="circle_70_vis">
+        <geometry><box><size>0.12 0.2945 0.005</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
+      </visual>
+    </link>
+    <link name="circle_71">
+      <pose>1.9981 -0.0872 0.0225 0 0 7.81035</pose>
+      <visual name="circle_71_vis">
+        <geometry><box><size>0.12 0.2945 0.005</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
+      </visual>
+    </link>
+    <link name="center_mark">
+      <pose>0.0000 0.0000 0.0225 0 0 0</pose>
+      <visual name="center_mark_vis">
+        <geometry><box><size>0.24 0.24 0.005</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
+      </visual>
+    </link>
+    <link name="penmark_p">
+      <pose>8.5000 0.0000 0.0225 0 0 0</pose>
+      <visual name="penmark_p_vis">
+        <geometry><box><size>0.24 0.24 0.005</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
+      </visual>
+    </link>
+    <link name="penmark_n">
+      <pose>-8.5000 0.0000 0.0225 0 0 0</pose>
+      <visual name="penmark_n_vis">
+        <geometry><box><size>0.24 0.24 0.005</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
+      </visual>
+    </link>
+    <link name="post_p_p">
+      <pose>11.0000 1.2500 0.9200 0 0 0</pose>
+      <visual name="post_p_p_vis">
+        <geometry><cylinder><radius>0.05</radius><length>1.8</length></cylinder></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
+      </visual>
+      <collision name="post_p_p_col">
+        <geometry><cylinder><radius>0.05</radius><length>1.8</length></cylinder></geometry>
+      </collision>
+    </link>
+    <link name="post_p_n">
+      <pose>11.0000 -1.2500 0.9200 0 0 0</pose>
+      <visual name="post_p_n_vis">
+        <geometry><cylinder><radius>0.05</radius><length>1.8</length></cylinder></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
+      </visual>
+      <collision name="post_p_n_col">
+        <geometry><cylinder><radius>0.05</radius><length>1.8</length></cylinder></geometry>
+      </collision>
+    </link>
+    <link name="crossbar_p">
+      <pose>11.0000 0.0000 1.8700 0 0 0</pose>
+      <visual name="crossbar_p_vis">
+        <geometry><box><size>0.1 2.6 0.1</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
+      </visual>
+      <collision name="crossbar_p_col">
+        <geometry><box><size>0.1 2.6 0.1</size></box></geometry>
+      </collision>
+    </link>
+    <link name="net_p">
+      <pose>11.6000 0.0000 0.9200 0 0 0</pose>
+      <visual name="net_p_vis">
+        <geometry><box><size>0.02 2.6 1.8</size></box></geometry>
+        <material><ambient>0.85 0.85 0.85 0.35</ambient><diffuse>0.85 0.85 0.85 0.35</diffuse></material>
+      </visual>
+    </link>
+    <link name="post_n_p">
+      <pose>-11.0000 1.2500 0.9200 0 0 0</pose>
+      <visual name="post_n_p_vis">
+        <geometry><cylinder><radius>0.05</radius><length>1.8</length></cylinder></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
+      </visual>
+      <collision name="post_n_p_col">
+        <geometry><cylinder><radius>0.05</radius><length>1.8</length></cylinder></geometry>
+      </collision>
+    </link>
+    <link name="post_n_n">
+      <pose>-11.0000 -1.2500 0.9200 0 0 0</pose>
+      <visual name="post_n_n_vis">
+        <geometry><cylinder><radius>0.05</radius><length>1.8</length></cylinder></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
+      </visual>
+      <collision name="post_n_n_col">
+        <geometry><cylinder><radius>0.05</radius><length>1.8</length></cylinder></geometry>
+      </collision>
+    </link>
+    <link name="crossbar_n">
+      <pose>-11.0000 0.0000 1.8700 0 0 0</pose>
+      <visual name="crossbar_n_vis">
+        <geometry><box><size>0.1 2.6 0.1</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
+      </visual>
+      <collision name="crossbar_n_col">
+        <geometry><box><size>0.1 2.6 0.1</size></box></geometry>
+      </collision>
+    </link>
+    <link name="net_n">
+      <pose>-11.6000 0.0000 0.9200 0 0 0</pose>
+      <visual name="net_n_vis">
+        <geometry><box><size>0.02 2.6 1.8</size></box></geometry>
+        <material><ambient>0.85 0.85 0.85 0.35</ambient><diffuse>0.85 0.85 0.85 0.35</diffuse></material>
+      </visual>
+    </link>
+    </model>
+
+    <model name="ball">
+      <pose>0 0 0.0850 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>0.055</mass>
+          <inertia><ixx>9.3e-5</ixx><ixy>0</ixy><ixz>0</ixz>
+                   <iyy>9.3e-5</iyy><iyz>0</iyz><izz>9.3e-5</izz></inertia>
+        </inertial>
+        <collision name="col">
+          <geometry><sphere><radius>0.065</radius></sphere></geometry>
+          <surface>
+            <friction><ode><mu>0.6</mu><mu2>0.6</mu2></ode></friction>
+            <bounce><restitution_coefficient>0.6</restitution_coefficient>
+                    <threshold>0.01</threshold></bounce>
+          </surface>
+        </collision>
+        <visual name="vis">
+          <geometry><sphere><radius>0.065</radius></sphere></geometry>
+          <material><ambient>1 0.5 0 1</ambient><diffuse>1 0.5 0 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+  </world>
+</sdf>

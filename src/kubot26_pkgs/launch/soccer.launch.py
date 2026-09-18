@@ -8,7 +8,7 @@ RoboCup KidSize 축구장 + kubot26 3대.
     ros2 topic pub --once /kubot1/KubotMode std_msgs/msg/Int32 "{data: 2}"
 
 필드 규격은 scripts/gen_field.py 의 FIELD 딕셔너리에서 수정 후 재생성:
-    python3 scripts/gen_field.py > worlds/robocup_kidsize.world
+    python3 scripts/gen_field.py > worlds/robocup_hsl_small.world
 """
 import os
 from ament_index_python.packages import get_package_share_directory
@@ -69,7 +69,7 @@ def spawn_robots(context, *args, **kwargs):
 
 
 def generate_launch_description():
-    world_path = os.path.join(pkg_share_dir, 'worlds', 'robocup_kidsize.world')
+    world_path = os.path.join(pkg_share_dir, 'worlds', 'robocup_hsl_small.world')
     plugin_path = os.path.join(pkg_share_dir, '../../lib/kubot26_pkgs')
     set_plugin_path = SetEnvironmentVariable(
         name='GAZEBO_PLUGIN_PATH',
