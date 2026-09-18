@@ -3,6 +3,9 @@
 
 using namespace std;
 
+// 기립 시 base_link 높이 [m] (URDF 누적값)
+static const double KUBOT26_STAND_BASE_Z = 0.431535;
+
 
 
 
@@ -55,6 +58,8 @@ namespace {
         { {0,-1, 0}, {1, 0, 0}, {0, 0, 1}, {0,-1, 0}, {0,-1, 0}, {-1, 0, 0} }, // RIGHT
     };
 
+    // 발바닥이 지면(z=0)에 닿을 때의 base_link 높이 [m]
+    //  = |base -> L_Foot 링크 원점| (발바닥은 L_Foot 원점과 일치)
     // Ankle_roll -> Foot 링크 원점 (고정 조인트)
     const double kFootOff[2][3] = {
         { 0.0557, -0.0001, -0.042},  // LEFT
@@ -160,6 +165,17 @@ MatrixXd CKubot::rotMatZ(double q)
     return tmp_m;
 }
 
+// =====================================================================
+//  [DEPRECATED / kubot25 전용] 아래 per-joint 변환 함수들
+//
+//  값(허벅지 0.138, 정강이 0.143, 힙 offset 0.05/-0.10464 ...)과
+//  조인트 순서(T01=yaw, T12=roll, T23=pitch) 모두 kubot25 기준이다.
+//  kubot26 은 pitch->roll->yaw 순서에 우측 pitch 축이 미러링되어 있어
+//  이 시그니처로는 표현할 수 없다 (T12~T56 가 좌우 공용이므로).
+//
+//  현재 호출부 없음. FK/IK/ZMPFK 는 전부 legTransform() 의
+//  kubot26 파라미터 표를 쓴다. 새 코드에서 쓰지 말 것.
+// =====================================================================
 MatrixXd CKubot::getTransformI0()
 {
     //  Frame 0 to Frame I
@@ -297,204 +313,39 @@ MatrixXd CKubot::jointToTransform56(VectorXd q)
 
 MatrixXd CKubot::jointToPosition(VectorXd q, double X, double Y, double Z)
 {
-    //  Extract position vector(3x1)
+    // 베이스 위치 (X,Y,Z) 에서의 양발 월드 위치.
+    // kubot26 기구(pitch->roll->yaw, 우측 축 미러)를 반영한 legTransform 을 쓴다.
+    // q 는 20개 관절 실측각, 앞 12개가 좌/우 다리.
+    Vector3d b(X, Y, Z);
+    Vector3d pL = b + legTransform(LEG_L, q.segment(0, 6)).block(0, 3, 3, 1);
+    Vector3d pR = b + legTransform(LEG_R, q.segment(6, 6)).block(0, 3, 3, 1);
 
-    VectorXd tmp_vL = VectorXd::Zero(3);
-    VectorXd tmp_vR = VectorXd::Zero(3);
-    VectorXd qL(6);
-    qL << q.block(0, 0, 6, 1);
-    VectorXd qR(6);
-    qR << q.block(6, 0, 6, 1);
-    VectorXd tmp_v = VectorXd::Zero(6);
-    MatrixXd tmp_m(4, 4);
-    MatrixXd tmg_b(4, 4);
-    tmg_b << 1, 0, 0, X,
-        0, 1, 0, Y,
-        0, 0, 1, Z,
-        0, 0, 0, 1;
-
-    int left = 0;
-    int right = 1;
-    for (int leg = 0; leg < 2; leg++)
-    {
-
-        if (leg == 0)
-        {
-            tmp_m = tmg_b *
-                    jointToTransform01(qL) *
-                    jointToTransform12(qL) *
-                    jointToTransform23(qL) *
-                    jointToTransform34(qL) *
-                    jointToTransform45(qL) *
-                    jointToTransform56(qL) *
-                    getTransform6E();
-
-            //    tmp_v = tmp_m.block(0,3,3,1);
-
-            tmp_vL(0) = tmp_m(0, 3);
-            tmp_vL(1) = tmp_m(1, 3);
-            tmp_vL(2) = tmp_m(2, 3);
-
-            // std::cout << "\nFK_jointToPosition_L:\n" << tmp_vL << std::endl;
-        }
-
-        else if (leg == 1)
-        {
-            tmp_m = tmg_b *
-                    jointToTransform01_R(qR) *
-                    jointToTransform12(qR) *
-                    jointToTransform23(qR) *
-                    jointToTransform34(qR) *
-                    jointToTransform45(qR) *
-                    jointToTransform56(qR) *
-                    getTransform6E();
-
-            //    tmp_v = tmp_m.block(0,3,3,1);
-
-            tmp_vR(0) = tmp_m(0, 3);
-            tmp_vR(1) = tmp_m(1, 3);
-            tmp_vR(2) = tmp_m(2, 3);
-
-            // std::cout << "FK_jointToPosition_R:\n" << tmp_vR << std::endl;
-        }
-    }
-    tmp_v << tmp_vL, tmp_vR;
-
-    // std::cout << "FK_jointToPosition_tmp_vL+tmp_vR:\n" << tmp_vL << "\n \n" << tmp_vR << std::endl;
-
-    // std::cout << "FK_jointToPosition_tmp_v:\n" << tmp_v  << std::endl;
-
-    return tmp_v; // std::cout << "FK_jointToPosition: " << tmp_m << std::endl;
+    VectorXd tmp_v(6);
+    tmp_v << pL, pR;
+    return tmp_v;
 }
 MatrixXd CKubot::jointToPosition(VectorXd q)
 {
-    //  Extract position vector(3x1)
-
-    VectorXd tmp_vL = VectorXd::Zero(3);
-    VectorXd tmp_vR = VectorXd::Zero(3);
-    VectorXd qL(6);
-    qL << q.block(0, 0, 6, 1);
-    VectorXd qR(6);
-    qR << q.block(6, 0, 6, 1);
-    VectorXd tmp_v = VectorXd::Zero(6);
-    MatrixXd tmp_m(4, 4);
-
-    int left = 0;
-    int right = 1;
-    for (int leg = 0; leg < 2; leg++)
-    {
-
-        if (leg == 0)
-        {
-            tmp_m = getTransformI0() *
-                    jointToTransform01(qL) *
-                    jointToTransform12(qL) *
-                    jointToTransform23(qL) *
-                    jointToTransform34(qL) *
-                    jointToTransform45(qL) *
-                    jointToTransform56(qL) *
-                    getTransform6E();
-
-            //    tmp_v = tmp_m.block(0,3,3,1);
-
-            tmp_vL(0) = tmp_m(0, 3);
-            tmp_vL(1) = tmp_m(1, 3);
-            tmp_vL(2) = tmp_m(2, 3);
-
-            // std::cout << "\nFK_jointToPosition_L:\n" << tmp_vL << std::endl;
-        }
-
-        else if (leg == 1)
-        {
-            tmp_m = getTransformI0() *
-                    jointToTransform01_R(qR) *
-                    jointToTransform12(qR) *
-                    jointToTransform23(qR) *
-                    jointToTransform34(qR) *
-                    jointToTransform45(qR) *
-                    jointToTransform56(qR) *
-                    getTransform6E();
-
-            //    tmp_v = tmp_m.block(0,3,3,1);
-
-            tmp_vR(0) = tmp_m(0, 3);
-            tmp_vR(1) = tmp_m(1, 3);
-            tmp_vR(2) = tmp_m(2, 3);
-
-            // std::cout << "FK_jointToPosition_R:\n" << tmp_vR << std::endl;
-        }
-    }
-    tmp_v << tmp_vL, tmp_vR;
-
-    // std::cout << "FK_jointToPosition_tmp_vL+tmp_vR:\n" << tmp_vL << "\n \n" << tmp_vR << std::endl;
-
-    // std::cout << "FK_jointToPosition_tmp_v:\n" << tmp_v  << std::endl;
-
-    return tmp_v; // std::cout << "FK_jointToPosition: " << tmp_m << std::endl;
+    // 기립 자세 베이스 높이 기준 양발 위치 (kubot26: 발바닥이 지면일 때 base z)
+    return jointToPosition(q, 0.0, 0.0, KUBOT26_STAND_BASE_Z);
 }
 
 MatrixXd CKubot::jointToPosition_R(VectorXd q)
 {
-    //  Extract position vector(3x1)
-
-    VectorXd tmp_v = VectorXd::Zero(3);
-    MatrixXd tmp_m(4, 4);
-
-    tmp_m = getTransformI0() *
-            jointToTransform01_R(q) *
-            jointToTransform12(q) *
-            jointToTransform23(q) *
-            jointToTransform34(q) *
-            jointToTransform45(q) *
-            jointToTransform56(q) *
-            getTransform6E();
-
-    //    tmp_v = tmp_m.block(0,3,3,1);
-
-    tmp_v(0) = tmp_m(0, 3);
-    tmp_v(1) = tmp_m(1, 3);
-    tmp_v(2) = tmp_m(2, 3);
-
+    Vector3d b(0.0, 0.0, KUBOT26_STAND_BASE_Z);
+    VectorXd tmp_v(3);
+    tmp_v = b + legTransform(LEG_R, q.segment(0, 6)).block(0, 3, 3, 1);
     return tmp_v;
-    // std::cout << "FK_jointToPosition: " << tmp_m << std::endl;
 }
 
 Matrix3d CKubot::jointToRotMat(VectorXd q)
 {
-    Matrix3d tmp_m;
-    MatrixXd T_IE(4, 4);
-
-    T_IE = getTransformI0() *
-           jointToTransform01(q) *
-           jointToTransform12(q) *
-           jointToTransform23(q) *
-           jointToTransform34(q) *
-           jointToTransform45(q) *
-           jointToTransform56(q) *
-           getTransform6E();
-
-    tmp_m = T_IE.block(0, 0, 3, 3);
-
-    return tmp_m;
+    return (Matrix3d)legTransform(LEG_L, q.segment(0, 6)).block(0, 0, 3, 3);
 }
 
 Matrix3d CKubot::jointToRotMat_R(VectorXd q)
 {
-    Matrix3d tmp_m;
-    MatrixXd T_IE(4, 4);
-
-    T_IE = getTransformI0() *
-           jointToTransform01_R(q) *
-           jointToTransform12(q) *
-           jointToTransform23(q) *
-           jointToTransform34(q) *
-           jointToTransform45(q) *
-           jointToTransform56(q) *
-           getTransform6E();
-
-    tmp_m = T_IE.block(0, 0, 3, 3);
-
-    return tmp_m;
+    return (Matrix3d)legTransform(LEG_R, q.segment(0, 6)).block(0, 0, 3, 3);
 }
 
 VectorXd CKubot::rotToEuler(MatrixXd rotMat)
@@ -3306,67 +3157,25 @@ void CKubot::zmpPreviewControl()
 
 MatrixXd CKubot::ZMPFK(VectorXd q)
 {
-    //  Extract position vector(3x1)
-
-    VectorXd tmp_v = VectorXd::Zero(3);
-    MatrixXd tmp_m(4, 4);
-    // MatrixXd tmp_fk(4,4);
-
-    tmp_m = getTransform6E() *
-            jointToTransform56(q).inverse() *
-            jointToTransform45(q).inverse() *
-            jointToTransform34(q).inverse() *
-            jointToTransform23(q).inverse() *
-            jointToTransform12(q).inverse() *
-            jointToTransform01_zmp(q).inverse() *
-            getTransformI0().inverse();
-
-    //    tmp_v = tmp_m.block(0,3,3,1);
-    // tmp_fk = tmp_m.inverse();
-
-    tmp_v(0) = tmp_m(0, 3);
-    tmp_v(1) = tmp_m(1, 3);
-    tmp_v(2) = tmp_m(2, 3);
-
-    return tmp_v;
-    // std::cout << "FK_jointToPosition: " << tmp_m << std::endl;
+    // 기립 베이스 기준 왼발 위치에서 역으로 베이스를 구한다 (호출부 없음, 일관성 유지용)
+    VectorXd foot(3);
+    foot = Vector3d(0.0, 0.0, KUBOT26_STAND_BASE_Z)
+         + legTransform(LEG_L, q.segment(0, 6)).block(0, 3, 3, 1);
+    return ZMPFK(q, foot);
 }
 
 MatrixXd CKubot::ZMPFK(VectorXd q, VectorXd qq)
 {
-    //  Extract position vector(3x1)
+    // 왼발 월드 위치 qq 에서 다리 체인을 거슬러 올라가 베이스 위치를 얻는다.
+    //   T = Trans(qq) * (base->foot)^-1
+    MatrixXd Tg = MatrixXd::Identity(4, 4);
+    Tg.block(0, 3, 3, 1) << qq(0), qq(1), qq(2);
 
-    VectorXd tmp_v = VectorXd::Zero(3);
-    MatrixXd tmp_m(4, 4);
-    MatrixXd tmf_g(4, 4);
-    tmf_g << 1, 0, 0, qq(0),
-        0, 1, 0, qq(1),
-        0, 0, 1, qq(2),
-        0, 0, 0, 1;
+    MatrixXd T = Tg * legTransform(LEG_L, q.segment(0, 6)).inverse();
 
-    // MatrixXd tmp_fk(4,4);
-
-    // Left_foot 기반 계산
-
-    tmp_m = tmf_g *
-            getTransform6E().inverse() *
-            jointToTransform56(q).inverse() *
-            jointToTransform45(q).inverse() *
-            jointToTransform34(q).inverse() *
-            jointToTransform23(q).inverse() *
-            jointToTransform12(q).inverse() *
-            jointToTransform01(q).inverse();
-    // getTransformI0().inverse();
-
-    //    tmp_v = tmp_m.block(0,3,3,1);
-    // tmp_fk = tmp_m.inverse();
-
-    tmp_v(0) = tmp_m(0, 3);
-    tmp_v(1) = tmp_m(1, 3);
-    tmp_v(2) = tmp_m(2, 3);
-
+    VectorXd tmp_v(3);
+    tmp_v << T(0, 3), T(1, 3), T(2, 3);
     return tmp_v;
-    // std::cout << "FK_jointToPosition: " << tmp_m << std::endl;
 }
 
 MatrixXd CKubot::jointToTransform01_zmp(VectorXd q)
