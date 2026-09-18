@@ -306,6 +306,18 @@ void gazebo::kubot26_plugin::UpdateAlgorithm(const common::UpdateInfo & _info)
     dt = current_time.Double() - last_update_time.Double();
     
     if (dt <= 0.0) {
+        // 시뮬레이션 리셋(/reset_simulation, Gazebo 의 Reset World)으로 sim time 이
+        // 0 으로 되감기면 dt 가 음수가 된다. 여기서 기준 시각을 다시 맞춰주지 않으면
+        // 매 틱 이 가드에 걸려 제어 루프가 영영 멈추고, 토크가 0 이 되어 로봇이
+        // 힘없이 주저앉는다.
+        last_update_time = current_time;
+
+        if (dt < 0.0) {
+            // 되감김 = 리셋. 내부 시계와 모션 타이머도 같이 맞춘다.
+            time = 0.0;
+            Kubot.realTime = 0.0;
+            Kubot.startTime = 0.0;
+        }
         return;
     }
 
@@ -1052,8 +1064,25 @@ void gazebo::kubot26_plugin::setjointPIDgain()
     joint[LHY].Kd = 0.06; joint[LHR].Kd = 0.08; joint[LHP].Kd = 0.11; joint[LKN].Kd = 0.10; joint[LAP].Kd = 0.06; joint[LAR].Kd = 0.06;
     joint[RHY].Kd = joint[LHY].Kd; joint[RHR].Kd = joint[LHR].Kd; joint[RHP].Kd = joint[LHP].Kd; joint[RKN].Kd = joint[LKN].Kd; joint[RAP].Kd = joint[LAP].Kd; joint[RAR].Kd = joint[LAR].Kd;
 
-    joint[LSP].Kp = 10; joint[LER].Kp = 10; joint[LHA].Kp = 10; joint[RSP].Kp = 10; joint[RER].Kp = 10; joint[RHA].Kp = 10; joint[NYA].Kp = 10; joint[HEP].Kp = 10;
-    joint[LSP].Kd = 0.01; joint[LER].Kd = 0.01; joint[LHA].Kd = 0.01; joint[RSP].Kd = 0.01; joint[RER].Kd = 0.01; joint[RHA].Kd = 0.01; joint[NYA].Kd = 0.01; joint[HEP].Kd = 0.01;
+    // 팔/목 게인. 기존 값은 전부 Kp=10 자리표시값이라 중력에 처졌다.
+    // 관절별 원위 체인 관성 I 와 1ms 스텝 안정조건(w*dt = sqrt(Kp/I)*dt << 2)을
+    // 보고 잡았다. 실제 출력은 jointcontroller() 에서 모터 스톨 토크로 포화된다.
+    //   Shoulder_roll I=1.13e-2 -> w=103 rad/s (w*dt=0.10)
+    //   Elbow_pitch   I=7.28e-4 -> w=262      (0.26)
+    //   Hand_pitch    I=1.04e-3 -> w=170      (0.17)
+    //   Neck_yaw      I=4.45e-4 -> w=212      (0.21)
+    //   Head_pitch    I=1.58e-3 -> w=159      (0.16)
+    joint[LSP].Kp = 120;  joint[RSP].Kp = 120;   // Shoulder_roll  (MX-64)
+    joint[LER].Kp = 50;   joint[RER].Kp = 50;    // Elbow_pitch    (MX-64)
+    joint[LHA].Kp = 30;   joint[RHA].Kp = 30;    // Hand_pitch     (MX-28)
+    joint[NYA].Kp = 20;                          // Neck_yaw       (MX-28)
+    joint[HEP].Kp = 40;                          // Head_pitch     (MX-28)
+
+    joint[LSP].Kd = 0.10; joint[RSP].Kd = 0.10;
+    joint[LER].Kd = 0.04; joint[RER].Kd = 0.04;
+    joint[LHA].Kd = 0.025; joint[RHA].Kd = 0.025;
+    joint[NYA].Kd = 0.02;
+    joint[HEP].Kd = 0.03;
 
     // ===== 실제 장착 모터의 스톨 토크 (Dynamixel MX 시리즈) =====
     // MX-106 : 8.4 Nm  - Hip_pitch, Hip_roll, Knee_pitch, Ankle_pitch, Ankle_roll
