@@ -85,7 +85,7 @@
         xyz="0.000480 0.000019 0.000040"
         rpy="0 0 0" />
       <geometry>
-        <box size="0.141000 0.265500 0.174950" />
+        <mesh filename="package://kubot26_pkgs/meshes/collision/base_link_collision.STL" />
       </geometry>
     </collision>
   </link>
@@ -121,10 +121,10 @@
     </visual>
     <collision>
       <origin
-        xyz="0.002500 0.000100 -0.037550"
+        xyz="0 0 0"
         rpy="0 0 0" />
       <geometry>
-        <box size="0.056600 0.061800 0.105100" />
+        <mesh filename="package://kubot26_pkgs/meshes/collision/L_Hip_pitch_collision.STL" />
       </geometry>
     </collision>
   </link>
@@ -182,10 +182,10 @@
     </visual>
     <collision>
       <origin
-        xyz="0.000100 0.000000 -0.033251"
+        xyz="0 0 0"
         rpy="0 0 0" />
       <geometry>
-        <box size="0.062000 0.030000 0.096497" />
+        <mesh filename="package://kubot26_pkgs/meshes/collision/L_Hip_roll_collision.STL" />
       </geometry>
     </collision>
   </link>
@@ -243,10 +243,10 @@
     </visual>
     <collision>
       <origin
-        xyz="-0.020050 0.002500 -0.021800"
+        xyz="0 0 0"
         rpy="0 0 0" />
       <geometry>
-        <box size="0.070100 0.056600 0.099600" />
+        <mesh filename="package://kubot26_pkgs/meshes/collision/L_Hip_yaw_collision.STL" />
       </geometry>
     </collision>
   </link>
@@ -304,10 +304,10 @@
     </visual>
     <collision>
       <origin
-        xyz="0.000000 0.000100 -0.071000"
+        xyz="0 0 0"
         rpy="0 0 0" />
       <geometry>
-        <box size="0.028000 0.055800 0.164334" />
+        <mesh filename="package://kubot26_pkgs/meshes/collision/L_Knee_pitch_collision.STL" />
       </geometry>
     </collision>
   </link>
@@ -365,10 +365,10 @@
     </visual>
     <collision>
       <origin
-        xyz="-0.026700 0.002500 0.018050"
+        xyz="0 0 0"
         rpy="0 0 0" />
       <geometry>
-        <box size="0.110600 0.056600 0.065100" />
+        <mesh filename="package://kubot26_pkgs/meshes/collision/L_Ankle_pitch_collision.STL" />
       </geometry>
     </collision>
   </link>
@@ -426,10 +426,10 @@
     </visual>
     <collision>
       <origin
-        xyz="0.058400 0.000000 -0.011000"
+        xyz="0 0 0"
         rpy="0 0 0" />
       <geometry>
-        <box size="0.084800 0.036000 0.050000" />
+        <mesh filename="package://kubot26_pkgs/meshes/collision/L_Ankle_roll_collision.STL" />
       </geometry>
     </collision>
   </link>
@@ -487,10 +487,10 @@
     </visual>
     <collision>
       <origin
-        xyz="0.002700 0.000100 0.005000"
+        xyz="0 0 0"
         rpy="0 0 0" />
       <geometry>
-        <box size="0.140000 0.080000 0.010000" />
+        <mesh filename="package://kubot26_pkgs/meshes/collision/L_Foot_collision.STL" />
       </geometry>
     </collision>
   </link>
@@ -539,10 +539,10 @@
     </visual>
     <collision>
       <origin
-        xyz="0.002500 -0.000100 -0.037550"
+        xyz="0 0 0"
         rpy="0 0 0" />
       <geometry>
-        <box size="0.056600 0.061800 0.105100" />
+        <mesh filename="package://kubot26_pkgs/meshes/collision/R_Hip_pitch_collision.STL" />
       </geometry>
     </collision>
   </link>
@@ -600,10 +600,10 @@
     </visual>
     <collision>
       <origin
-        xyz="0.000100 0.000000 -0.033251"
+        xyz="0 0 0"
         rpy="0 0 0" />
       <geometry>
-        <box size="0.062000 0.030000 0.096497" />
+        <mesh filename="package://kubot26_pkgs/meshes/collision/R_Hip_roll_collision.STL" />
       </geometry>
     </collision>
   </link>
@@ -661,10 +661,10 @@
     </visual>
     <collision>
       <origin
-        xyz="-0.020050 -0.002500 -0.021800"
+        xyz="0 0 0"
         rpy="0 0 0" />
       <geometry>
-        <box size="0.070100 0.056600 0.099600" />
+        <mesh filename="package://kubot26_pkgs/meshes/collision/R_Hip_yaw_collision.STL" />
       </geometry>
     </collision>
   </link>
@@ -722,10 +722,10 @@
     </visual>
     <collision>
       <origin
-        xyz="0.000000 -0.000100 -0.071000"
+        xyz="0 0 0"
         rpy="0 0 0" />
       <geometry>
-        <box size="0.028000 0.055800 0.164334" />
+        <mesh filename="package://kubot26_pkgs/meshes/collision/R_Knee_pitch_collision.STL" />
       </geometry>
     </collision>
   </link>
@@ -783,10 +783,10 @@
     </visual>
     <collision>
       <origin
-        xyz="-0.026700 -0.002500 0.018050"
+        xyz="0 0 0"
         rpy="0 0 0" />
       <geometry>
-        <box size="0.110600 0.056600 0.065100" />
+        <mesh filename="package://kubot26_pkgs/meshes/collision/R_Ankle_pitch_collision.STL" />
       </geometry>
     </collision>
   </link>
@@ -844,10 +844,10 @@
     </visual>
     <collision>
       <origin
-        xyz="0.058400 0.000000 -0.011000"
+        xyz="0 0 0"
         rpy="0 0 0" />
       <geometry>
-        <box size="0.084800 0.036000 0.050000" />
+        <mesh filename="package://kubot26_pkgs/meshes/collision/R_Ankle_roll_collision.STL" />
       </geometry>
     </collision>
   </link>
@@ -905,10 +905,10 @@
     </visual>
     <collision>
       <origin
-        xyz="0.002700 -0.000100 0.005000"
+        xyz="0 0 0"
         rpy="0 0 0" />
       <geometry>
-        <box size="0.140000 0.080000 0.010000" />
+        <mesh filename="package://kubot26_pkgs/meshes/collision/R_Foot_collision.STL" />
       </geometry>
     </collision>
   </link>
@@ -957,10 +957,10 @@
     </visual>
     <collision>
       <origin
-        xyz="0.000100 0.010350 -0.037844"
+        xyz="0 0 0"
         rpy="0 0 0" />
       <geometry>
-        <box size="0.056800 0.051300 0.103687" />
+        <mesh filename="package://kubot26_pkgs/meshes/collision/L_Shoulder_roll_collision.STL" />
       </geometry>
     </collision>
   </link>
@@ -1018,10 +1018,10 @@
     </visual>
     <collision>
       <origin
-        xyz="-0.001307 0.000100 -0.046076"
+        xyz="0 0 0"
         rpy="0 0 0" />
       <geometry>
-        <box size="0.048500 0.054800 0.115000" />
+        <mesh filename="package://kubot26_pkgs/meshes/collision/L_Elbow_pitch_collision.STL" />
       </geometry>
     </collision>
   </link>
@@ -1079,10 +1079,10 @@
     </visual>
     <collision>
       <origin
-        xyz="0.000000 0.001900 -0.013300"
+        xyz="0 0 0"
         rpy="0 0 0" />
       <geometry>
-        <box size="0.035600 0.043400 0.050600" />
+        <mesh filename="package://kubot26_pkgs/meshes/collision/L_Hand_pitch_collision.STL" />
       </geometry>
     </collision>
   </link>
@@ -1140,10 +1140,10 @@
     </visual>
     <collision>
       <origin
-        xyz="0.000100 -0.010350 -0.037844"
+        xyz="0 0 0"
         rpy="0 0 0" />
       <geometry>
-        <box size="0.056800 0.051300 0.103687" />
+        <mesh filename="package://kubot26_pkgs/meshes/collision/R_Shoulder_roll_collision.STL" />
       </geometry>
     </collision>
   </link>
@@ -1201,10 +1201,10 @@
     </visual>
     <collision>
       <origin
-        xyz="-0.001307 -0.000100 -0.046076"
+        xyz="0 0 0"
         rpy="0 0 0" />
       <geometry>
-        <box size="0.048500 0.054800 0.115000" />
+        <mesh filename="package://kubot26_pkgs/meshes/collision/R_Elbow_pitch_collision.STL" />
       </geometry>
     </collision>
   </link>
@@ -1262,10 +1262,10 @@
     </visual>
     <collision>
       <origin
-        xyz="0.000000 -0.001900 -0.013300"
+        xyz="0 0 0"
         rpy="0 0 0" />
       <geometry>
-        <box size="0.035600 0.043400 0.050600" />
+        <mesh filename="package://kubot26_pkgs/meshes/collision/R_Hand_pitch_collision.STL" />
       </geometry>
     </collision>
   </link>
@@ -1323,10 +1323,10 @@
     </visual>
     <collision>
       <origin
-        xyz="-0.000000 0.000000 0.037000"
+        xyz="0 0 0"
         rpy="0 0 0" />
       <geometry>
-        <box size="0.025000 0.052550 0.032500" />
+        <mesh filename="package://kubot26_pkgs/meshes/collision/Neck_yaw_collision.STL" />
       </geometry>
     </collision>
   </link>
@@ -1384,10 +1384,10 @@
     </visual>
     <collision>
       <origin
-        xyz="0.001660 0.000000 0.032300"
+        xyz="0 0 0"
         rpy="0 0 0" />
       <geometry>
-        <box size="0.038920 0.131000 0.088600" />
+        <mesh filename="package://kubot26_pkgs/meshes/collision/Head_pitch_collision.STL" />
       </geometry>
     </collision>
   </link>
