@@ -19,6 +19,16 @@ import sys, os, shutil, tempfile
 import xml.etree.ElementTree as ET
 import mujoco
 
+# 볼록 껍질이 오목부를 메우면서 생기는 '가짜' 접촉 쌍.
+# 원본 visual 메쉬로는 10~13 mm 떨어져 있는데 껍질끼리는 겹친다.
+# 부모-자식 쌍은 물리엔진이 자동으로 거르므로 조부모 관계만 여기 남긴다.
+HULL_ARTIFACT_PAIRS = [
+    ('base_link', 'L_Elbow_pitch'),      # 원본 10.2 mm 이격
+    ('base_link', 'R_Elbow_pitch'),      # 원본 10.1 mm 이격
+    ('L_Knee_pitch', 'L_Ankle_roll'),    # 원본 12.9 mm 이격
+    ('R_Knee_pitch', 'R_Ankle_roll'),    # 원본 12.9 mm 이격
+]
+
 # 모터 스톨 토크 [Nm]
 MX106, MX64, MX28 = 8.4, 6.0, 2.5
 TORQUE = {}
@@ -55,7 +65,7 @@ def base_inertial(urdf_path):
     raise SystemExit("base_link 를 찾지 못했습니다")
 
 
-def main(urdf_in, mjcf_out, spawn_z=0.50, self_collision=False):
+def main(urdf_in, mjcf_out, spawn_z=0.50):
     # package:// 를 상대경로로 바꾼 임시 URDF 를 만든다 (MuJoCo 는 package:// 를 모른다)
     pkg_dir = os.path.dirname(os.path.dirname(os.path.abspath(urdf_in)))
     tmp = tempfile.mkdtemp()
@@ -75,6 +85,8 @@ def main(urdf_in, mjcf_out, spawn_z=0.50, self_collision=False):
     wb = r.find('worldbody')
 
     # worldbody 직속 요소(= 용접된 base_link 의 내용물)를 body 로 감싼다
+    contact = ET.SubElement(r, 'contact')
+
     loose = [c for c in list(wb) if c.tag in ('geom', 'body')]
     for c in loose:
         wb.remove(c)
@@ -85,26 +97,22 @@ def main(urdf_in, mjcf_out, spawn_z=0.50, self_collision=False):
         base.append(c)
     wb.append(base)
 
-    # 자기충돌 처리 — 기본은 끈다 (Gazebo 의 self_collide=false 와 맞추기 위함).
+    # 자기충돌 — 켜둔다. 끄면 정책이 실기에서 불가능한 다리 교차 동작을 학습한다.
     #
-    # 볼록 껍질은 오목한 부분을 메우므로 인접하지 않은 링크끼리도 겹친다.
-    # 실측: Knee_pitch <-> Ankle_roll 이 자세와 무관하게 상시 25.2 mm 침투,
-    #       base_link <-> Elbow_pitch 가 1.4~2.1 mm 침투.
-    # MuJoCo 는 부모-자식 쌍만 자동으로 거르므로 조부모-손자 쌍이 그대로 남는다.
-    # 켜두면 허위 접촉력이 계속 걸리고, 같은 로봇이 Gazebo 와 다르게 움직인다.
+    # kubot26 은 정강이 폭 55.8 mm 에 힙 간격이 117 mm 뿐이라 여유가 적다.
+    # 원본 메쉬로 실측한 결과 hip_roll 이 8 도만 넘어도 좌우 정강이가 실제로 닿는다:
+    #     0deg 61.6mm / 5deg 16.9mm / 8deg 이상 접촉
+    # 볼록 껍질과 원본 메쉬가 모든 각도에서 같은 결과를 내므로, 다리끼리의
+    # 충돌 판정에는 껍질을 그대로 써도 정확하다 (정강이 외곽 폭이 껍질과 동일).
     #
-    # contype/conaffinity 로 차단한다. 충돌 조건은
-    #   (contype1 & conaffinity2) || (contype2 & conaffinity1)
-    #   로봇-로봇 : (1&0)|(1&0) = 0  -> 충돌 안 함
-    #   로봇-지면 : (1&1)|(1&0) = 1  -> 충돌함
-    if not self_collision:
-        for g in base.iter('geom'):
-            g.set('contype', '1')
-            g.set('conaffinity', '0')
+    # 다만 껍질이 오목부를 메우면서 '실제로는 안 닿는데 닿는다'고 나오는 쌍이 있다.
+    # 전 링크 쌍을 원본 메쉬와 대조해 걸러낸 결과가 아래 목록이다.
+    # (부모-자식 쌍은 엔진이 자동으로 거르므로 여기엔 조부모 관계만 남는다)
+    for a, b in HULL_ARTIFACT_PAIRS:
+        ET.SubElement(contact, 'exclude', {'body1': a, 'body2': b})
 
     ET.SubElement(wb, 'geom', {'name': 'floor', 'type': 'plane', 'size': '20 20 0.1',
-                               'rgba': '0.3 0.5 0.3 1', 'condim': '3',
-                               'contype': '1', 'conaffinity': '1'})
+                               'rgba': '0.3 0.5 0.3 1', 'condim': '3'})
     ET.SubElement(wb, 'light', {'pos': '0 0 3', 'dir': '0 0 -1', 'diffuse': '0.8 0.8 0.8'})
 
     act = ET.SubElement(r, 'actuator')
@@ -139,5 +147,4 @@ def main(urdf_in, mjcf_out, spawn_z=0.50, self_collision=False):
 if __name__ == '__main__':
     if len(sys.argv) < 3:
         sys.exit(__doc__)
-    # 세 번째 인자로 'selfcol' 을 주면 자기충돌을 켠다
-    main(sys.argv[1], sys.argv[2], self_collision=(len(sys.argv) > 3 and sys.argv[3] == 'selfcol'))
+    main(sys.argv[1], sys.argv[2])
