@@ -240,15 +240,23 @@ void gazebo::kubot26_plugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf
 
     // 2. 중요: 기존의 Node 생성 방식을 완전히 지우고 gazebo_ros 인터페이스 연결
     // rclcpp::Node::make_shared를 가제보 내부에서 호출하면 스레드가 충돌하여 터집니다.
-    this->node_ = gazebo_ros::Node::Get(_sdf);
+    // 여러 대를 동시에 띄우면 플러그인 이름이 그대로 ROS 노드 이름이 되어 충돌한다.
+    // (이름이 겹치면 Node::Get 은 nullptr 를 돌려주고, 그대로 쓰면 세그폴트로 죽는다)
+    // 모델 이름으로 고유화한다.
+    this->node_ = gazebo_ros::Node::Get(_sdf, this->model->GetName() + "_plugin");
+    if (!this->node_) {
+        gzerr << "[KUBOT] ROS 노드 생성 실패 (이름 충돌 가능): "
+              << this->model->GetName() << std::endl;
+        return;
+    }
 
     // 3. ROS2 토픽 구독(Subscription) 설정
     this->KubotModesp = this->node_->create_subscription<std_msgs::msg::Int32>(
-        "/KubotMode", 10, std::bind(&kubot26_plugin::KubotMode, this, std::placeholders::_1));
+        "KubotMode", 10, std::bind(&kubot26_plugin::KubotMode, this, std::placeholders::_1));
     this->Kubot_control_mode_sub = this->node_->create_subscription<kubot26_pkgs::msg::KubotControlMsgs>(
-        "/Kubot_Control_Msg", 10, std::bind(&kubot26_plugin::Kubot_control_callback, this, std::placeholders::_1));
+        "Kubot_Control_Msg", 10, std::bind(&kubot26_plugin::Kubot_control_callback, this, std::placeholders::_1));
     this->Kubot_joy_sub = this->node_->create_subscription<sensor_msgs::msg::Joy>( 
-        "/joy", 10, std::bind(&kubot26_plugin::Kubot_joy_callback, this, std::placeholders::_1));
+        "joy", 10, std::bind(&kubot26_plugin::Kubot_joy_callback, this, std::placeholders::_1));
     
     // 4. 로봇 내부 링크 및 조인트 포인터 매핑
     setjoints();
@@ -282,7 +290,7 @@ void gazebo::kubot26_plugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf
     P_R_foot_ref_z = this->node_->create_publisher<std_msgs::msg::Float64>("R_foot_ref_Z", 10);
     P_R_foot_FK_x = this->node_->create_publisher<std_msgs::msg::Float64>("R_foot_FK_X", 10);
     P_R_foot_FK_z = this->node_->create_publisher<std_msgs::msg::Float64>("R_foot_FK_Z", 10);
-    P_joint_states = this->node_->create_publisher<sensor_msgs::msg::JointState>("/joint_states", 10);
+    P_joint_states = this->node_->create_publisher<sensor_msgs::msg::JointState>("joint_states", 10);
 
     // 7. 타이머 초기화 및 이벤트 연결
     this->last_update_time = this->model->GetWorld()->SimTime();
@@ -979,12 +987,28 @@ void gazebo::kubot26_plugin::getjointdata()
 
 void gazebo::kubot26_plugin::setsensor() 
 {
-    Sensor = sensors::get_sensor("IMU");
-    IMU = std::dynamic_pointer_cast<sensors::ImuSensor>(Sensor);   
+    // 여러 대를 동시에 띄우면 "IMU" 라는 이름의 센서가 모델 수만큼 존재한다.
+    // 전역 이름으로 찾으면 다른 로봇의 IMU 를 잡으므로 모델 스코프 이름을 쓴다.
+    //   형식: <world>::<model>::<link>::<sensor>
+    const std::string scoped =
+        this->model->GetWorld()->Name() + "::" + this->model->GetName() + "::base_link::IMU";
+
+    Sensor = sensors::get_sensor(scoped);
+    if (!Sensor) {
+        // 단독 실행 등 호환용 폴백
+        Sensor = sensors::get_sensor("IMU");
+    }
+    IMU = std::dynamic_pointer_cast<sensors::ImuSensor>(Sensor);
+
+    if (!IMU) {
+        printf("[KUBOT] IMU 센서를 찾지 못했습니다 (%s)\n", scoped.c_str());
+    }
 }
 
 void gazebo::kubot26_plugin::getsensordata()
 {
+    if (!IMU) return;
+
     double IMUdata[3];
     IMUdata[0] = IMU->Orientation().Euler()[0];
     IMUdata[1] = IMU->Orientation().Euler()[1];

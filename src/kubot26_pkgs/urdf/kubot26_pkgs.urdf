@@ -1519,6 +1519,10 @@
   <!-- ===== Gazebo Classic 모델 플러그인 ===== -->
   <gazebo>
     <plugin name="kubot26_plugin" filename="libkubot_control_node.so">
+      <!-- 네임스페이스는 비워둔다. 여러 대를 띄울 때는 spawn_entity.py 의
+           -robot_namespace 가 <ros><namespace> 를 여기에 주입한다.
+           빈 <namespace></namespace> 를 미리 박아두면 주입이 덮어쓰지 못해
+           모든 로봇이 전역 토픽을 공유하게 되므로 넣지 않는다. -->
     </plugin>
   </gazebo>
 
